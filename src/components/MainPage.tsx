@@ -2,6 +2,7 @@ import { Col, Input, Row, Typography, Button } from "antd";
 import React from "react";
 import SwipeCards from "./SwipeCards";
 import SwipeDeck from "./SwipeDeck";
+import AiRecommend from "./AiRecommend";
 
 export default function MainPage() {
   return (
@@ -20,7 +21,7 @@ export default function MainPage() {
           Describe The Movie You Want
         </Typography>
         <Row style={{ width: "100%", justifyContent: "space-around" }}>
-          <Input style={{ width: "85%" }}></Input> <Button>FIND</Button>
+          <AiRecommend/>
         </Row>
         <Row style={{ width: "100%", justifyContent: "space-around" }}>
               <SwipeDeck />

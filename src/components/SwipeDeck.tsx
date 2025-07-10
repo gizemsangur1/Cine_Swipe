@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import BadOmens from "../../public/badomens.jpg";
 import type { StaticImageData } from "next/image";
 import SwipeCard from "./SwipeCards";
+import { useUserStore } from "@/store/useUserStore";
+import toast from "react-hot-toast";
 
 interface Movie {
   id: number;
@@ -20,9 +22,13 @@ const initialMovies: Movie[] = [
 
 export default function SwipeDeck() {
   const [movies, setMovies] = useState<Movie[]>(initialMovies);
+  const user = useUserStore((state) => state.user);
+  const notify = () => toast('First login.');
 
   const handleSwipe = (direction: "left" | "right") => {
     const swipedMovie = movies[0];
+	user?  notify()
+	:
     console.log(
       direction === "right"
         ? `Added to watchlist: ${swipedMovie.title}`
