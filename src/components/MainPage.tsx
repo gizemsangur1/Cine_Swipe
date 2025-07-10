@@ -23,9 +23,7 @@ export default function MainPage() {
         <Row style={{ width: "100%", justifyContent: "space-around" }}>
           <AiRecommend/>
         </Row>
-        <Row style={{ width: "100%", justifyContent: "space-around" }}>
-              <SwipeDeck />
-        </Row>
+        
       </Col>
     </Row>
   );

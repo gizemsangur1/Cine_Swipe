@@ -3,11 +3,10 @@ import { Typography } from "antd";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
 import Draggable from "react-draggable";
-import type { StaticImageData } from "next/image";
 
 interface SwipeCardProps {
   onSwipe: (direction: "left" | "right") => void;
-  image: StaticImageData;
+  image: string;
   title: string;
   description: string;
   imdb: number;
@@ -73,7 +72,7 @@ export default function SwipeCard({
         ref={nodeRef}
         style={{
           width: 250,
-          height: 350,
+          height: 450,
           background: "#fff",
           borderRadius: 10,
           boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
@@ -86,7 +85,8 @@ export default function SwipeCard({
           left: 0,
           cursor: "grab",
           userSelect: "none",
-          ...getTransformStyle(), 
+          ...getTransformStyle(),
+		  padding:"7px"
         }}
       >
         <Image
@@ -96,11 +96,14 @@ export default function SwipeCard({
           alt={title}
           style={{ borderRadius: 8 }}
         />
-        <div style={{ textAlign: "center" }}>
-          <Typography.Title level={5}>{title}</Typography.Title>
-          <Typography.Text>{description}</Typography.Text>
-          <br />
-          <Typography.Text strong>IMDB: {imdb}</Typography.Text>
+        <div style={{ textAlign: "center", padding: "0 5px" }}>
+          <Typography.Title level={5} ellipsis>
+            {title}
+          </Typography.Title>
+          <Typography.Paragraph ellipsis={{ rows: 5 }}>
+            {description}
+          </Typography.Paragraph>
+          <Typography.Text strong>IMDB: {imdb.toFixed(1)}</Typography.Text>
         </div>
       </div>
     </Draggable>
