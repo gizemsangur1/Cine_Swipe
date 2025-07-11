@@ -43,3 +43,4 @@ export async function addToWatchlist(title: string) {
 
   return { success: true };
 }
+

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
 export default function AuthButtons() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,15 +24,27 @@ export default function AuthButtons() {
   if (user)
     return (
       <Row
-        style={{ display: "flex", justifyContent: "end", padding: "10px" }}
+        style={{ display: "flex", justifyContent: "space-between", padding: "10px",alignItems:"center" }}
         gutter={4}
       >
+        <Col span={2}><Link href="/profile">
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              backgroundColor: "blue",
+            }}
+          >
+            
+          </div></Link>
+        </Col>
         <Col span={2}>
           <Button
             style={{ width: "100%" }}
             onClick={() => router.push("/watchlist")}
           >
-            WatchList
+            Watch List
           </Button>
         </Col>
       </Row>

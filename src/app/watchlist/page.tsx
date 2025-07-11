@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Typography, Card, Row, Col, Spin } from "antd";
+import { Typography, Card, Row, Col, Spin, Button } from "antd";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 import { supabase } from "@/lib/supabaseClient";
@@ -40,43 +40,68 @@ export default function WatchlistPage() {
     }
   }, [user]);
 
- useEffect(() => {
-  const fetchWatchlist = async () => {
+  useEffect(() => {
+    const fetchWatchlist = async () => {
+      if (!user?.id || !user?.token) return;
+
+      try {
+        const res = await fetch(`/api/watchlist?userId=${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        const watchlist = await res.json();
+
+        if (!res.ok) {
+          console.error("Watchlist fetch failed:", watchlist?.error);
+          return;
+        }
+
+        const tmdbDetails = await Promise.all(
+          watchlist.map(async (entry: { movie_id: number }) => {
+            const tmdbRes = await fetch(
+              `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
+            );
+            return await tmdbRes.json();
+          })
+        );
+
+        setMovies(tmdbDetails);
+      } catch (err) {
+        console.error("Watchlist fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWatchlist();
+  }, [user?.id, user?.token]);
+
+  const handleDelete = async (movieId: number) => {
     if (!user?.id || !user?.token) return;
 
     try {
-      const res = await fetch(`/api/watchlist?userId=${user.id}`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-
-      const watchlist = await res.json(); 
-
-      if (!res.ok) {
-        console.error("Watchlist fetch failed:", watchlist?.error);
-        return;
-      }
-
-      const tmdbDetails = await Promise.all(
-        watchlist.map(async (entry: { movie_id: number }) => {
-          const tmdbRes = await fetch(
-            `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
-          );
-          return await tmdbRes.json();
-        })
+      const res = await fetch(
+        `/api/watchlist?userId=${user.id}&movieId=${movieId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
       );
 
-      setMovies(tmdbDetails);
+      if (res.ok) {
+        setMovies((prev) => prev.filter((m) => m.id !== movieId));
+      } else {
+        const errorData = await res.json();
+        console.error("Delete failed:", errorData?.error);
+      }
     } catch (err) {
-      console.error("Watchlist fetch error:", err);
-    } finally {
-      setLoading(false);
+      console.error("Delete error:", err);
     }
   };
-
-  fetchWatchlist();
-}, [user?.id, user?.token]);
 
   if (loading) {
     return (
@@ -113,6 +138,21 @@ export default function WatchlistPage() {
               {movie.vote_average && (
                 <Typography.Text>⭐ {movie.vote_average}</Typography.Text>
               )}
+              <Row
+                style={{
+                  width: "100%",
+                  justifyContent: "space-between",
+                  marginTop: "15px",
+                }}
+              >
+                <Button
+                  style={{ width: "45%" }}
+                  onClick={() => handleDelete(movie.id)}
+                >
+                  Delete
+                </Button>
+                <Button style={{ width: "45%" }}>Watched</Button>
+              </Row>
             </Card>
           </Col>
         ))}
