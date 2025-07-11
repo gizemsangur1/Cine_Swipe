@@ -11,9 +11,7 @@ export default function AuthInit() {
   useEffect(() => {
     if (session?.user) {
       setUser({
-        name: session.user.name ?? "",
         email: session.user.email ?? "",
-        image: session.user.image ?? undefined,
       });
     } else {
       setUser(null);

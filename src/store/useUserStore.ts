@@ -2,9 +2,9 @@
 import { create } from "zustand";
 
 type User = {
-  name: string;
-  email: string;
-  image?: string;
+  id?:string;
+  email?: string;
+  token?:string;
 };
 
 interface UserStore {

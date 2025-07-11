@@ -29,7 +29,7 @@ export default function AuthButtons() {
         <Col span={2}>
           <Button
             style={{ width: "100%" }}
-            onClick={() => router.push("/auth/signin")}
+            onClick={() => router.push("/watchlist")}
           >
             WatchList
           </Button>

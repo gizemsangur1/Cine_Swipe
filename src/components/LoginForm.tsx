@@ -3,6 +3,7 @@
 import { Form, Input, Button, message } from "antd";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -19,7 +20,12 @@ export default function LoginForm() {
       message.error("Login failed: " + error.message);
     } else {
       message.success("Welcome back!");
-      console.log("Logged in user:", data.user); 
+      useUserStore.getState().setUser(data.user);
+      await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+      
       router.push("/");
     }
   };

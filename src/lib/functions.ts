@@ -1,12 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
 
-type Movie = {
-  id: number;
-  title: string;
-  poster_path: string;
-  overview: string;
-  vote_average: number;
-};
 export async function addToWatchlist(title: string) {
   const {
     data: { session },
@@ -19,9 +12,28 @@ export async function addToWatchlist(title: string) {
 
   const userId = session.user.id;
 
-  const { data, error } = await supabase.from("watchlist").insert({
+  const tmdbSearchRes = await fetch(
+    `https://api.themoviedb.org/3/search/movie?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&query=${encodeURIComponent(
+      title
+    )}`
+  );
+
+  const searchData = await tmdbSearchRes.json();
+  const movie = searchData.results?.[0];
+
+  if (!movie) {
+    throw new Error("Movie not found on TMDB");
+  }
+
+  const { id, title: movieTitle, poster_path, overview, vote_average } = movie;
+
+  const { error } = await supabase.from("watchlist").insert({
     user_id: userId,
-    title: title,
+    movie_id: id,
+    title: movieTitle,
+    poster_path,
+    overview,
+    vote_average,
   });
 
   if (error) {
@@ -29,5 +41,5 @@ export async function addToWatchlist(title: string) {
     throw error;
   }
 
-  return data;
+  return { success: true };
 }
