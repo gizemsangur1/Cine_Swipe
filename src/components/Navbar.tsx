@@ -1,5 +1,5 @@
 "use client";
-import { Button, Col, Row } from "antd";
+import { Button, Col, Row, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -24,28 +24,32 @@ export default function AuthButtons() {
   if (user)
     return (
       <Row
-        style={{ display: "flex", justifyContent: "space-between", padding: "10px",alignItems:"center" }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "10px",
+          alignItems: "center",
+        }}
         gutter={4}
       >
-        <Col span={2}><Link href="/profile">
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              backgroundColor: "blue",
-            }}
-          >
-            
-          </div></Link>
+        <Col span={4}>
+          <Link href="/">
+            <Typography style={{ fontSize: "36px", fontWeight: "bold" }}>
+              CineSwipe
+            </Typography>
+          </Link>
         </Col>
-        <Col span={2}>
-          <Button
-            style={{ width: "100%" }}
-            onClick={() => router.push("/watchlist")}
-          >
-            Watch List
-          </Button>
+        <Col span={2} style={{ display: "flex", justifyContent: "end" }}>
+          <Link href="/profile">
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                borderRadius: "50%",
+                backgroundColor: "blue",
+              }}
+            ></div>
+          </Link>
         </Col>
       </Row>
     );
