@@ -2,6 +2,7 @@
 import { Button, Input, Row } from "antd";
 import React, { useState } from "react";
 import SwipeDeck from "./SwipeDeck";
+import { addToWatchlist } from "@/lib/functions";
 
 export default function AiRecommend() {
   const [input, setInput] = useState("");
@@ -38,13 +39,12 @@ export default function AiRecommend() {
     }
   };
 
-  const handleSwipe = (id: number, direction: "left" | "right") => {
+  const handleSwipe = async (id: number, direction: "left" | "right") => {
     const swipedMovie = movies.find((m) => m.id === id);
-    console.log(
       direction === "right"
-        ? `Added to watchlist: ${swipedMovie.title}`
+        ? await addToWatchlist(swipedMovie.title)
         : `Skipped: ${swipedMovie.title}`
-    );
+    
     setMovies((prev) => prev.filter((m) => m.id !== id));
   };
 
@@ -52,7 +52,7 @@ export default function AiRecommend() {
     <>
       <Row style={{ width: "100%" }}>
         <Input
-          style={{ width: "85%" }}
+          style={{ width: "80%" }}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. romantic period drama with strong female lead"
