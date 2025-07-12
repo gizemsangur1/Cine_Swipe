@@ -57,15 +57,22 @@ export default function Watched() {
         const watchedlist = await res.json();
 
         if (!res.ok) {
-          console.error("Watchlist fetch failed:", watchedlist?.error);
+          console.error("Watchedlist fetch failed:", watchedlist?.error);
           return;
         }
 
-      
+        const tmdbDetails = await Promise.all(
+          watchedlist.map(async (entry: { movie_id: number }) => {
+            const tmdbRes = await fetch(
+              `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
+            );
+            return await tmdbRes.json();
+          })
+        );
 
-        setMovies(watchedlist);
+        setMovies(tmdbDetails);
       } catch (err) {
-        console.error("watchedlist fetch error:", err);
+        console.error("Watchedlist fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -99,6 +106,8 @@ export default function Watched() {
     }
   };
 
+  console.log(movies);
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: 50 }}>
@@ -109,7 +118,7 @@ export default function Watched() {
 
   return (
     <div style={{ padding: "40px" }}>
-      <Typography.Title level={2}>Your Watchlist 🎬</Typography.Title>
+      <Typography.Title level={2}>Watched Movies 🎬</Typography.Title>
       <Row gutter={[16, 16]}>
         {movies.map((movie) => (
           <Col xs={24} sm={12} md={8} lg={6} key={movie.id}>

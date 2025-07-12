@@ -65,7 +65,7 @@ export default function ProfilePage() {
           </Link>
         </Col>
         <Col className={styles.linkcol} span={4}>
-          <Link className={styles.link} href="#">
+          <Link className={styles.link} href="/watched">
             Watched Movies
           </Link>
         </Col>

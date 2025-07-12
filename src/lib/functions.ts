@@ -80,3 +80,4 @@ export async function addToWatchedlist(movie: Movie) {
 
   return { success: true };
 }
+
