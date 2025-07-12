@@ -3,6 +3,9 @@ import { create } from "zustand";
 
 type User = {
   id?:string;
+  name?:string;
+  surname?:string;
+  username?:string;
   email?: string;
   token?:string;
 };

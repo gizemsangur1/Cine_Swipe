@@ -8,11 +8,18 @@ export default function RegisterForm() {
   const router = useRouter();
 
   const onFinish = async (values: any) => {
-    const { email, password } = values;
+    const { name, surname, username, email, password } = values;
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name,
+          surname,
+          username,
+        },
+      },
     });
 
     if (error) {
@@ -30,6 +37,27 @@ export default function RegisterForm() {
       onFinish={onFinish}
       style={{ width: 300, margin: "60px auto" }}
     >
+      <Form.Item
+        label="Name"
+        name="name"
+        rules={[{ required: true, message: "Please input your name!" }]}
+      >
+        <Input type="name" />
+      </Form.Item>
+      <Form.Item
+        label="Surname"
+        name="surname"
+        rules={[{ required: true, message: "Please input your surname!" }]}
+      >
+        <Input type="surname" />
+      </Form.Item>
+      <Form.Item
+        label="Username"
+        name="username"
+        rules={[{ required: true, message: "Please input your username!" }]}
+      >
+        <Input type="username" />
+      </Form.Item>
       <Form.Item
         label="Email"
         name="email"

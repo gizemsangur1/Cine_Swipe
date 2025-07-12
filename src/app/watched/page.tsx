@@ -5,7 +5,6 @@ import { Typography, Card, Row, Col, Spin, Button } from "antd";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 import { supabase } from "@/lib/supabaseClient";
-import { addToWatchedlist } from "@/lib/functions";
 
 type Movie = {
   id: number;
@@ -15,7 +14,7 @@ type Movie = {
   vote_average?: number;
 };
 
-export default function WatchlistPage() {
+export default function Watched() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const user = useUserStore((state) => state.user);
@@ -45,41 +44,34 @@ export default function WatchlistPage() {
   }, [user]);
 
   useEffect(() => {
-    const fetchWatchlist = async () => {
+    const fetchWatchedList = async () => {
       if (!user?.id || !user?.token) return;
 
       try {
-        const res = await fetch(`/api/watchlist?userId=${user.id}`, {
+        const res = await fetch(`/api/watched?userId=${user.id}`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
         });
 
-        const watchlist = await res.json();
+        const watchedlist = await res.json();
 
         if (!res.ok) {
-          console.error("Watchlist fetch failed:", watchlist?.error);
+          console.error("Watchlist fetch failed:", watchedlist?.error);
           return;
         }
 
-        const tmdbDetails = await Promise.all(
-          watchlist.map(async (entry: { movie_id: number }) => {
-            const tmdbRes = await fetch(
-              `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
-            );
-            return await tmdbRes.json();
-          })
-        );
+      
 
-        setMovies(tmdbDetails);
+        setMovies(watchedlist);
       } catch (err) {
-        console.error("Watchlist fetch error:", err);
+        console.error("watchedlist fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWatchlist();
+    fetchWatchedList();
   }, [user?.id, user?.token]);
 
   const handleDelete = async (movieId: number) => {
@@ -87,7 +79,7 @@ export default function WatchlistPage() {
 
     try {
       const res = await fetch(
-        `/api/watchlist?userId=${user.id}&movieId=${movieId}`,
+        `/api/watched?userId=${user.id}&movieId=${movieId}`,
         {
           method: "DELETE",
           headers: {
@@ -104,25 +96,6 @@ export default function WatchlistPage() {
       }
     } catch (err) {
       console.error("Delete error:", err);
-    }
-  };
-
-  const handleWatchedMovie = async (id: number) => {
-    const movie = movies.find((m) => m.id === id);
-    if (!movie) return;
-
-    try {
-      await addToWatchedlist({
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path || "",
-        overview: movie.overview || "",
-        vote_average: movie.vote_average || 0,
-      });
-
-      await handleDelete(movie.id);
-    } catch (error) {
-      console.error("Failed to add to watchedlist:", error);
     }
   };
 
@@ -173,12 +146,6 @@ export default function WatchlistPage() {
                   onClick={() => handleDelete(movie.id)}
                 >
                   Delete
-                </Button>
-                <Button
-                  style={{ width: "45%" }}
-                  onClick={() => handleWatchedMovie(movie.id)}
-                >
-                  Watched
                 </Button>
               </Row>
             </Card>

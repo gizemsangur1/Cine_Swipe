@@ -1,5 +1,13 @@
 import { supabase } from "@/lib/supabaseClient";
 
+type Movie = {
+  id: number;
+  title: string;
+  poster_path?: string;
+  overview?: string;
+  vote_average?: number;
+};
+
 export async function addToWatchlist(title: string) {
   const {
     data: { session },
@@ -44,3 +52,31 @@ export async function addToWatchlist(title: string) {
   return { success: true };
 }
 
+export async function addToWatchedlist(movie: Movie) {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.user) {
+    throw new Error("User not logged in");
+  }
+
+  const { id, title, poster_path, overview, vote_average } = movie;
+
+  const { error } = await supabase.from("watched").insert({
+    user_id: session.user.id,
+    movie_id: id,
+    title,
+    poster_path,
+    overview,
+    vote_average,
+  });
+
+  if (error) {
+    console.error("Failed to insert to watched list", error);
+    throw error;
+  }
+
+  return { success: true };
+}
