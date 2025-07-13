@@ -18,6 +18,7 @@ export default function RegisterForm() {
           name,
           surname,
           username,
+          avatar_url:""
         },
       },
     });

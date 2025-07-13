@@ -5,21 +5,36 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function AuthButtons() {
-  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        setUser(data.session.user);
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data.user) {
+        const authUser = data.user;
+
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.user_metadata?.name,
+          surname: authUser.user_metadata?.surname,
+          username: authUser.user_metadata?.username,
+          avatar_url: authUser.user_metadata?.avatar_url || "", 
+        });
+      } else if (error) {
+        console.error("Failed to fetch user", error.message);
       }
     };
 
-    fetchSession();
-  }, []);
+    if (!user) {
+      fetchUser();
+    }
+  }, [user, setUser]);
 
   if (user)
     return (
@@ -43,10 +58,12 @@ export default function AuthButtons() {
           <Link href="/profile">
             <div
               style={{
-                width: "60px",
-                height: "60px",
+                width: "90px",
+                height: "90px",
+                backgroundColor: "#ddd",
                 borderRadius: "50%",
-                backgroundColor: "blue",
+                backgroundImage: `url(${user?.avatar_url})`,
+                backgroundSize: "cover",
               }}
             ></div>
           </Link>

@@ -8,6 +8,7 @@ type User = {
   username?:string;
   email?: string;
   token?:string;
+  avatar_url?:string;
 };
 
 interface UserStore {

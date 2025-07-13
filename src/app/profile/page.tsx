@@ -1,11 +1,12 @@
 "use client";
+
 import { useUserStore } from "@/store/useUserStore";
 import { Button, Col, Row, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import styles from "./page.module.css";
-import supabase from "@/utils/supabase";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -14,15 +15,20 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
       if (data.user) {
-        const { data: profile } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
+        const authUser = data.user;
 
-        setUser({ ...data.user.user_metadata, ...profile });
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.user_metadata?.name,
+          surname: authUser.user_metadata?.surname,
+          username: authUser.user_metadata?.username,
+          avatar_url: authUser.user_metadata?.avatar_url || "", 
+        });
+      } else if (error) {
+        console.error("Failed to fetch user", error.message);
       }
     };
 
@@ -39,10 +45,13 @@ export default function ProfilePage() {
           style={{
             width: "150px",
             height: "150px",
-            backgroundColor: "blue",
+            backgroundColor: "#ddd",
             borderRadius: "50%",
+            backgroundImage: user?.avatar_url ? `url(${user.avatar_url})` : "none",
+            backgroundSize: "cover",
           }}
         ></div>
+
         <div
           style={{
             display: "flex",
@@ -58,6 +67,7 @@ export default function ProfilePage() {
           </Typography>
         </div>
       </Row>
+
       <Row style={{ width: "100%", marginTop: "25px" }}>
         <Col className={styles.linkcol} span={4}>
           <Link className={styles.link} href="/watchlist">
