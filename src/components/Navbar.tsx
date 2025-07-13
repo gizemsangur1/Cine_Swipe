@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
+import SearchBar from "./SearchBar";
 
 export default function AuthButtons() {
   const router = useRouter();
@@ -54,7 +55,7 @@ const user = useUserStore((state) => state.user);
             </Typography>
           </Link>
         </Col>
-        <Col span={4}><Input></Input></Col>
+        <Col span={10}><SearchBar/></Col>
         <Col span={2} style={{ display: "flex", justifyContent: "end" }}>
           <Link href="/profile">
             <div
