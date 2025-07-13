@@ -33,6 +33,7 @@ export default function WatchlistPage() {
           email: data.session.user.email!,
           id: data.session.user.id,
           token: data.session.access_token,
+          avatar_url: data.session.user.user_metadata?.avatar_url || "",
         });
       } else {
         console.warn("Session ya da access token eksik");

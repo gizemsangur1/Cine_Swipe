@@ -1,5 +1,5 @@
 "use client";
-import { Button, Col, Row, Typography } from "antd";
+import { Button, Col, Input, Row, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -54,6 +54,7 @@ const user = useUserStore((state) => state.user);
             </Typography>
           </Link>
         </Col>
+        <Col span={4}><Input></Input></Col>
         <Col span={2} style={{ display: "flex", justifyContent: "end" }}>
           <Link href="/profile">
             <div
