@@ -4,5 +4,5 @@ export type Movie = {
   overview: string;
   poster_path: string;
   vote_average: number;
-  [key: string]: any;
+  [key: string]: unknown;
 };
