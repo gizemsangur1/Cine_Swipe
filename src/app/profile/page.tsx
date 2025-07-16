@@ -1,15 +1,13 @@
 "use client";
 
 import { useUserStore } from "@/store/useUserStore";
-import { Button, Col, Row, Typography } from "antd";
+import {  Col, Row, Typography } from "antd";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import styles from "./page.module.css";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
 

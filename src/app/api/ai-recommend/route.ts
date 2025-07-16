@@ -26,6 +26,6 @@ export async function POST(req: Request) {
     const movieTitles = JSON.parse(responseText!); 
     return NextResponse.json(movieTitles);
   } catch (err) {
-    return NextResponse.json({ error: "AI output could not be parsed" }, { status: 500 });
+    return NextResponse.json({ error: "AI output could not be parsed",err }, { status: 500 });
   }
 }

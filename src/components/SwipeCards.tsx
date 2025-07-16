@@ -1,8 +1,9 @@
 "use client";
+
 import { Typography } from "antd";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import Draggable from "react-draggable";
+import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 
 interface SwipeCardProps {
   onSwipe: (direction: "left" | "right") => void;
@@ -24,11 +25,11 @@ export default function SwipeCard({
   const [flyDirection, setFlyDirection] = useState<"left" | "right" | null>(null);
   const [xOffset, setXOffset] = useState(0);
 
-  const handleDrag = (_: any, data: any) => {
+  const handleDrag = (_: DraggableEvent, data: DraggableData) => {
     setXOffset(data.x);
   };
 
-  const handleStop = (_: any, data: any) => {
+  const handleStop = (_: DraggableEvent, data: DraggableData) => {
     if (data.x > 120) {
       setFlyDirection("right");
       setIsFlying(true);
@@ -85,8 +86,8 @@ export default function SwipeCard({
           left: 0,
           cursor: "grab",
           userSelect: "none",
+          padding: "7px",
           ...getTransformStyle(),
-		  padding:"7px"
         }}
       >
         <Image

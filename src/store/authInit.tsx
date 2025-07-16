@@ -16,7 +16,7 @@ export default function AuthInit() {
     } else {
       setUser(null);
     }
-  }, [session]);
+  }, [session,setUser]);
 
   return null;
 }

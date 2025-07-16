@@ -1,7 +1,5 @@
-import { Col, Input, Row, Typography, Button } from "antd";
+import { Col, Row, Typography } from "antd";
 import React from "react";
-import SwipeCards from "./SwipeCards";
-import SwipeDeck from "./SwipeDeck";
 import AiRecommend from "./AiRecommend";
 
 export default function MainPage() {

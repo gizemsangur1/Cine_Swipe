@@ -133,7 +133,7 @@ export default function SearchBar() {
 
       {movies.length === 0 && !loading && query && (
         <div style={{ marginTop: "8px", color: "#999" }}>
-          No results found for "{query}".
+          No results found for &quot;{query}&quot;.
         </div>
       )}
     </div>

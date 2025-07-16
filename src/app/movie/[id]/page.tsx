@@ -3,10 +3,26 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
+import Image from "next/image";
+
+type Genre = {
+  id: number;
+  name: string;
+};
+
+type MovieDetails = {
+  title: string;
+  overview: string;
+  release_date: string;
+  vote_average: number;
+  backdrop_path: string;
+  poster_path: string;
+  genres: Genre[];
+};
 
 export default function Movie() {
   const { id } = useParams();
-  const [movie, setMovie] = useState<any>(null);
+  const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -26,7 +42,7 @@ export default function Movie() {
           }
         );
         setMovie(response.data);
-      } catch (error) {
+      } catch (err) {
         setError("Failed to fetch movie details");
       } finally {
         setLoading(false);
@@ -36,10 +52,8 @@ export default function Movie() {
     fetchMovieDetails();
   }, [id]);
 
-  if (loading)
-    return <div className="centered">Loading...</div>;
-  if (error)
-    return <div className="centered error">{error}</div>;
+  if (loading) return <div className="centered">Loading...</div>;
+  if (error) return <div className="centered error">{error}</div>;
   if (!movie) return null;
 
   return (
@@ -73,7 +87,9 @@ export default function Movie() {
           zIndex: 1,
         }}
       >
-        <img
+        <Image
+          width={300}
+          height={300}
           src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
           alt={movie.title}
           style={{
@@ -86,14 +102,24 @@ export default function Movie() {
           <h1 style={{ fontSize: "36px", marginBottom: "20px" }}>
             {movie.title}
           </h1>
-          <p style={{ fontSize: "16px", lineHeight: "1.6", marginBottom: "20px", color: "#dddddd" }}>
+          <p
+            style={{
+              fontSize: "16px",
+              lineHeight: "1.6",
+              marginBottom: "20px",
+              color: "#dddddd",
+            }}
+          >
             {movie.overview}
           </p>
-          <p><strong>Release Date:</strong> {movie.release_date}</p>
-          <p><strong>Rating:</strong> {movie.vote_average}</p>
           <p>
-            <strong>Genres:</strong>{" "}
-            {movie.genres.map((g: any) => g.name).join(", ")}
+            <strong>Release Date:</strong> {movie.release_date}
+          </p>
+          <p>
+            <strong>Rating:</strong> {movie.vote_average}
+          </p>
+          <p>
+            <strong>Genres:</strong> {movie.genres.map((g) => g.name).join(", ")}
           </p>
         </div>
       </div>

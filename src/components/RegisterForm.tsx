@@ -4,13 +4,21 @@ import { Form, Input, Button, message } from "antd";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
+type RegisterFormValues = {
+  name: string;
+  surname: string;
+  username: string;
+  email: string;
+  password: string;
+};
+
 export default function RegisterForm() {
   const router = useRouter();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: RegisterFormValues) => {
     const { name, surname, username, email, password } = values;
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -18,7 +26,7 @@ export default function RegisterForm() {
           name,
           surname,
           username,
-          avatar_url:""
+          avatar_url: "",
         },
       },
     });
@@ -66,7 +74,6 @@ export default function RegisterForm() {
       >
         <Input type="email" />
       </Form.Item>
-
       <Form.Item
         label="Password"
         name="password"
@@ -77,7 +84,6 @@ export default function RegisterForm() {
       >
         <Input.Password />
       </Form.Item>
-
       <Form.Item>
         <Button type="primary" htmlType="submit" block>
           Register

@@ -15,6 +15,12 @@ import {
 import { useEffect, useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 
+type ProfileFormValues = {
+  name: string;
+  surname: string;
+  username: string;
+};
+
 export default function Settings() {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
@@ -43,63 +49,62 @@ export default function Settings() {
     fetchUser();
   }, [form, setUser]);
 
-const onFinish = async (values: any) => {
-  const { name, surname, username } = values;
+  const onFinish = async (values: ProfileFormValues) => {
+    const { name, surname, username } = values;
 
-  let avatarUrl = user?.avatar_url;
+    let avatarUrl = user?.avatar_url;
 
-  if (selectedAvatar && user?.id) {
-    const fileExt = selectedAvatar.name.split(".").pop();
-    const fileName = `${user.id}.${fileExt}`;
+    if (selectedAvatar && user?.id) {
+      const fileExt = selectedAvatar.name.split(".").pop();
+      const fileName = `${user.id}.${fileExt}`;
 
-    await supabase.storage.from("avatars").remove([fileName]);
+      await supabase.storage.from("avatars").remove([fileName]);
 
-    const { data: uploaded, error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, selectedAvatar, {
-        upsert: true,
-        cacheControl: "3600",
-        contentType: selectedAvatar.type || "image/jpeg",
-      });
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, selectedAvatar, {
+          upsert: true,
+          cacheControl: "3600",
+          contentType: selectedAvatar.type || "image/jpeg",
+        });
 
-    if (uploadError) {
-      message.error("Avatar upload failed: " + uploadError.message);
-      return;
+      if (uploadError) {
+        message.error("Avatar upload failed: " + uploadError.message);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+      avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
     }
 
-    const { data: urlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(fileName);
-
-    avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-  }
-
-  const { error } = await supabase.auth.updateUser({
-    data: {
-      name,
-      surname,
-      username,
-      avatar_url: avatarUrl,
-    },
-  });
-
-  if (error) {
-    message.error("Failed to update profile: " + error.message);
-  } else {
-    message.success("Profile updated successfully!");
-    setUser({
-      ...user,
-      name,
-      surname,
-      username,
-      avatar_url: avatarUrl,
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        name,
+        surname,
+        username,
+        avatar_url: avatarUrl,
+      },
     });
 
-    setSelectedAvatar(null);
-    setPreviewUrl(null);
-  }
-};
+    if (error) {
+      message.error("Failed to update profile: " + error.message);
+    } else {
+      message.success("Profile updated successfully!");
+      setUser({
+        ...user,
+        name,
+        surname,
+        username,
+        avatar_url: avatarUrl,
+      });
 
+      setSelectedAvatar(null);
+      setPreviewUrl(null);
+    }
+  };
 
   const handleBeforeUpload = (file: File) => {
     const tempUrl = URL.createObjectURL(file);

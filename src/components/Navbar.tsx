@@ -1,9 +1,8 @@
 "use client";
-import { Button, Col, Input, Row, Typography } from "antd";
-import React, { useEffect, useState } from "react";
+import { Button, Col, Row, Typography } from "antd";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
 import SearchBar from "./SearchBar";

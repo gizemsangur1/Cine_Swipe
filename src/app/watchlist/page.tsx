@@ -36,14 +36,14 @@ export default function WatchlistPage() {
           avatar_url: data.session.user.user_metadata?.avatar_url || "",
         });
       } else {
-        console.warn("Session ya da access token eksik");
+        console.warn("Session ya da access token eksik",error);
       }
     };
 
     if (!user) {
       restoreUser();
     }
-  }, [user]);
+  }, [user,setUser]);
 
   useEffect(() => {
     const fetchWatchlist = async () => {
