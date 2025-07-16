@@ -2,10 +2,12 @@ import { Input, Button } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { Movie } from "@/types/Movie"; 
+
 
 export default function SearchBar() {
   const [query, setQuery] = useState<string>("");
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showResults, setShowResults] = useState(false);

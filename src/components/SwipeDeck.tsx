@@ -3,14 +3,9 @@ import React from "react";
 import SwipeCard from "./SwipeCards";
 import { useUserStore } from "@/store/useUserStore";
 import toast from "react-hot-toast";
+import { Movie } from "@/types/Movie"; 
 
-interface Movie {
-  id: number;
-  title: string;
-  overview: string;
-  poster_path: string;
-  vote_average: number;
-}
+
 
 interface SwipeDeckProps {
   movies: Movie[];

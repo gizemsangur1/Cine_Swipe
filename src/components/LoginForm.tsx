@@ -5,10 +5,15 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
+
 export default function LoginForm() {
   const router = useRouter();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: LoginFormValues) => {
     const { email, password } = values;
 
     const { data, error } = await supabase.auth.signInWithPassword({

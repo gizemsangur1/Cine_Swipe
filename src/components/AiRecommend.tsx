@@ -3,15 +3,20 @@ import { Button, Input, Row } from "antd";
 import React, { useState } from "react";
 import SwipeDeck from "./SwipeDeck";
 import { addToWatchlist } from "@/lib/functions";
+import { Movie } from "@/types/Movie";
+
+
 
 export default function AiRecommend() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
 
   const fetchMovieDetailsFromTMDB = async (title: string) => {
     const res = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+      `https://api.themoviedb.org/3/search/movie?api_key=${
+        process.env.NEXT_PUBLIC_TMDB_API_KEY
+      }&query=${encodeURIComponent(title)}`
     );
     const data = await res.json();
     return data.results?.[0] || null;
@@ -41,10 +46,11 @@ export default function AiRecommend() {
 
   const handleSwipe = async (id: number, direction: "left" | "right") => {
     const swipedMovie = movies.find((m) => m.id === id);
-      direction === "right"
-        ? await addToWatchlist(swipedMovie.title)
-        : `Skipped: ${swipedMovie.title}`
-    
+    if (direction === "right" && swipedMovie?.title) {
+      await addToWatchlist(swipedMovie.title);
+    } else {
+      console.log(`Skipped: ${swipedMovie?.title}`);
+    }
     setMovies((prev) => prev.filter((m) => m.id !== id));
   };
 
@@ -63,7 +69,9 @@ export default function AiRecommend() {
         </Button>
       </Row>
 
-      <Row style={{ width: "100%", justifyContent: "center", marginTop: "30px" }}>
+      <Row
+        style={{ width: "100%", justifyContent: "center", marginTop: "30px" }}
+      >
         <SwipeDeck movies={movies} onSwipe={handleSwipe} />
       </Row>
     </>
