@@ -1,8 +1,10 @@
 "use client";
 
 import { Form, Input, Button, message } from "antd";
-import { supabase } from "@/lib/supabaseClient";
+import { account, databases } from "@/lib/appwrite"; 
+import { ID } from "appwrite";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
 
 type RegisterFormValues = {
   name: string;
@@ -14,28 +16,46 @@ type RegisterFormValues = {
 
 export default function RegisterForm() {
   const router = useRouter();
+  const setUser = useUserStore((s) => s.setUser);
 
   const onFinish = async (values: RegisterFormValues) => {
     const { name, surname, username, email, password } = values;
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          surname,
-          username,
-          avatar_url: "",
-        },
-      },
-    });
+    try {
+      const user = await account.create(ID.unique(), email, password, `${name} ${surname}`);
+      await account.createEmailPasswordSession(email, password);
 
-    if (error) {
-      message.error(error.message);
-    } else {
-      message.success("Account created. Please check your email.");
-      router.push("/auth/signin");
+      await databases.createDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+        user.$id,
+        { email, name, surname, username, avatar_url: "" }
+      );
+
+      const userDoc = await databases.getDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+        user.$id
+      );
+
+      setUser({
+        id: userDoc.$id,
+        email,
+        name,
+        surname,
+        username,
+        avatar_url: "",
+      });
+
+      message.success("Account created & logged in!");
+      router.push("/");
+    } catch (error: any) {
+      console.error("Register error:", error);
+      if (error.code === 409) {
+        message.error("This email is already registered.");
+      } else {
+        message.error(error.message || "Registration failed.");
+      }
     }
   };
 
@@ -46,41 +66,26 @@ export default function RegisterForm() {
       onFinish={onFinish}
       style={{ width: 300, margin: "60px auto" }}
     >
-      <Form.Item
-        label="Name"
-        name="name"
-        rules={[{ required: true, message: "Please input your name!" }]}
-      >
-        <Input type="name" />
+      <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+        <Input />
       </Form.Item>
-      <Form.Item
-        label="Surname"
-        name="surname"
-        rules={[{ required: true, message: "Please input your surname!" }]}
-      >
-        <Input type="surname" />
+      <Form.Item label="Surname" name="surname" rules={[{ required: true }]}>
+        <Input />
       </Form.Item>
-      <Form.Item
-        label="Username"
-        name="username"
-        rules={[{ required: true, message: "Please input your username!" }]}
-      >
-        <Input type="username" />
+      <Form.Item label="Username" name="username" rules={[{ required: true }]}>
+        <Input />
       </Form.Item>
       <Form.Item
         label="Email"
         name="email"
-        rules={[{ required: true, message: "Please input your email!" }]}
+        rules={[{ required: true, type: "email" }]}
       >
-        <Input type="email" />
+        <Input />
       </Form.Item>
       <Form.Item
         label="Password"
         name="password"
-        rules={[
-          { required: true, message: "Please input your password!" },
-          { min: 6, message: "Password must be at least 6 characters." },
-        ]}
+        rules={[{ required: true, min: 6 }]}
       >
         <Input.Password />
       </Form.Item>

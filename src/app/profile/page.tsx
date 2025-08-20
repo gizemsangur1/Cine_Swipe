@@ -1,11 +1,11 @@
 "use client";
 
 import { useUserStore } from "@/store/useUserStore";
-import {  Col, Row, Typography } from "antd";
+import { Col, Row, Typography } from "antd";
 import Link from "next/link";
 import React, { useEffect } from "react";
 import styles from "./page.module.css";
-import { supabase } from "@/lib/supabaseClient";
+import { account } from "@/lib/appwrite";
 
 export default function ProfilePage() {
   const user = useUserStore((state) => state.user);
@@ -13,20 +13,18 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data.user) {
-        const authUser = data.user;
-
+      try {
+        const authUser = await account.get();
         setUser({
-          id: authUser.id,
+          id: authUser.$id,
           email: authUser.email,
-          name: authUser.user_metadata?.name,
-          surname: authUser.user_metadata?.surname,
-          username: authUser.user_metadata?.username,
-          avatar_url: authUser.user_metadata?.avatar_url || "", 
+          name: authUser.name,
+          surname: (authUser as any).surname || "",
+          username: (authUser as any).username || "",
+          avatar_url: (authUser as any).avatar_url || "",
         });
-      } else if (error) {
-        console.error("Failed to fetch user", error.message);
+      } catch (err: any) {
+        console.error("Failed to fetch user", err.message);
       }
     };
 
@@ -34,7 +32,6 @@ export default function ProfilePage() {
       fetchUser();
     }
   }, [user, setUser]);
-  console.log(user)
 
   return (
     <Row style={{ width: "100%", padding: "25px" }}>
@@ -45,7 +42,9 @@ export default function ProfilePage() {
             height: "150px",
             backgroundColor: "#ddd",
             borderRadius: "50%",
-            backgroundImage: user?.avatar_url ? `url(${user.avatar_url})` : "none",
+            backgroundImage: user?.avatar_url
+              ? `url(${user.avatar_url})`
+              : "none",
             backgroundSize: "cover",
           }}
         ></div>

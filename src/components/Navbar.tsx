@@ -1,42 +1,57 @@
 "use client";
+
 import { Button, Col, Row, Typography } from "antd";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
 import SearchBar from "./SearchBar";
+import { account, databases } from "@/lib/appwrite";
 
 export default function AuthButtons() {
   const router = useRouter();
-const user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data.user) {
-        const authUser = data.user;
+      try {
+        const authUser = await account.get();
+
+        const userDoc = await databases.getDocument(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+          process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+          authUser.$id
+        );
 
         setUser({
-          id: authUser.id,
+          id: userDoc.$id,
           email: authUser.email,
-          name: authUser.user_metadata?.name,
-          surname: authUser.user_metadata?.surname,
-          username: authUser.user_metadata?.username,
-          avatar_url: authUser.user_metadata?.avatar_url || "", 
+          name: userDoc.name || "",
+          surname: userDoc.surname || "",
+          username: userDoc.username || "",
+          avatar_url: userDoc.avatar_url || "",
         });
-      } else if (error) {
-        console.error("Failed to fetch user", error.message);
+      } catch {
+        setUser(null);
       }
     };
 
-    if (!user) {
-      fetchUser();
-    }
-  }, [user, setUser]);
+    fetchUser();
+  }, [setUser]);
 
-  if (user)
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession("current");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setUser(null);
+      router.push("/");
+    }
+  };
+
+  if (user) {
     return (
       <Row
         style={{
@@ -54,7 +69,9 @@ const user = useUserStore((state) => state.user);
             </Typography>
           </Link>
         </Col>
-        <Col span={10}><SearchBar/></Col>
+        <Col span={10}>
+          <SearchBar />
+        </Col>
         <Col span={2} style={{ display: "flex", justifyContent: "end" }}>
           <Link href="/profile">
             <div
@@ -63,14 +80,20 @@ const user = useUserStore((state) => state.user);
                 height: "90px",
                 backgroundColor: "#ddd",
                 borderRadius: "50%",
-                backgroundImage: `url(${user?.avatar_url})`,
+                backgroundImage: user?.avatar_url
+                  ? `url(${user.avatar_url})`
+                  : "none",
                 backgroundSize: "cover",
               }}
             ></div>
           </Link>
+          <Button onClick={handleLogout} style={{ marginLeft: "10px" }}>
+            Logout
+          </Button>
         </Col>
       </Row>
     );
+  }
 
   return (
     <Row

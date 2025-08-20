@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Typography, Card, Row, Col, Spin, Button } from "antd";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
-import { supabase } from "@/lib/supabaseClient";
+import { useSession } from "next-auth/react";
 
 type Movie = {
   id: number;
@@ -17,44 +17,29 @@ type Movie = {
 export default function Watched() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
 
   useEffect(() => {
-    const restoreUser = async () => {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (data.session?.user && data.session?.access_token) {
-        setUser({
-          name: data.session.user.user_metadata.name,
-          surname: data.session.user.user_metadata.surname,
-          username: data.session.user.user_metadata.username,
-          email: data.session.user.email!,
-          id: data.session.user.id,
-          token: data.session.access_token,
-          avatar_url: data.session.user.user_metadata?.avatar_url || "",
-        });
-      } else {
-        console.warn("Session ya da access token eksik",error);
-      }
-    };
-
-    if (!user) {
-      restoreUser();
+    if (session?.user && !user) {
+      setUser({
+        id: session.user.id,
+        email: session.user.email!,
+        name: (session.user as any).name || "",
+        surname: (session.user as any).surname || "",
+        username: (session.user as any).username || "",
+        avatar_url: (session.user as any).avatar_url || "",
+      });
     }
-  }, [user,setUser]);
+  }, [session, user, setUser]);
 
   useEffect(() => {
     const fetchWatchedList = async () => {
-      if (!user?.id || !user?.token) return;
+      if (!user?.id) return;
 
       try {
-        const res = await fetch(`/api/watched?userId=${user.id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-
+        const res = await fetch(`/api/watched?userId=${user.id}`);
         const watchedlist = await res.json();
 
         if (!res.ok) {
@@ -80,20 +65,15 @@ export default function Watched() {
     };
 
     fetchWatchedList();
-  }, [user?.id, user?.token]);
+  }, [user?.id]);
 
   const handleDelete = async (movieId: number) => {
-    if (!user?.id || !user?.token) return;
+    if (!user?.id) return;
 
     try {
       const res = await fetch(
         `/api/watched?userId=${user.id}&movieId=${movieId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
+        { method: "DELETE" }
       );
 
       if (res.ok) {
@@ -106,8 +86,6 @@ export default function Watched() {
       console.error("Delete error:", err);
     }
   };
-
-  console.log(movies);
 
   if (loading) {
     return (

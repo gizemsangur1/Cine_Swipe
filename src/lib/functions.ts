@@ -1,4 +1,9 @@
-import { supabase } from "@/lib/supabaseClient";
+import { account, databases } from "@/lib/appwrite";
+import { ID } from "appwrite";
+
+const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+const WATCHLIST_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_WATCHLIST_COLLECTION_ID!;
+const WATCHED_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_WATCHED_COLLECTION_ID!;
 
 type Movie = {
   id: number;
@@ -9,17 +14,10 @@ type Movie = {
 };
 
 export async function addToWatchlist(title: string) {
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+  const user = await account.get();
+  if (!user) throw new Error("User not logged in");
 
-  if (sessionError || !session?.user) {
-    throw new Error("User not logged in");
-  }
-
-  const userId = session.user.id;
-
+  // TMDB'den film bul
   const tmdbSearchRes = await fetch(
     `https://api.themoviedb.org/3/search/movie?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&query=${encodeURIComponent(
       title
@@ -35,49 +33,42 @@ export async function addToWatchlist(title: string) {
 
   const { id, title: movieTitle, poster_path, overview, vote_average } = movie;
 
-  const { error } = await supabase.from("watchlist").insert({
-    user_id: userId,
-    movie_id: id,
-    title: movieTitle,
-    poster_path,
-    overview,
-    vote_average,
-  });
-
-  if (error) {
-    console.error("Failed to insert to watchlist", error);
-    throw error;
-  }
+  await databases.createDocument(
+    DATABASE_ID,
+    WATCHLIST_COLLECTION_ID,
+    ID.unique(),
+    {
+      user_id: user.$id,
+      movie_id: id,
+      title: movieTitle,
+      poster_path,
+      overview,
+      vote_average,
+    }
+  );
 
   return { success: true };
 }
 
 export async function addToWatchedlist(movie: Movie) {
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-
-  if (sessionError || !session?.user) {
-    throw new Error("User not logged in");
-  }
+  const user = await account.get();
+  if (!user) throw new Error("User not logged in");
 
   const { id, title, poster_path, overview, vote_average } = movie;
 
-  const { error } = await supabase.from("watched").insert({
-    user_id: session.user.id,
-    movie_id: id,
-    title,
-    poster_path,
-    overview,
-    vote_average,
-  });
-
-  if (error) {
-    console.error("Failed to insert to watched list", error);
-    throw error;
-  }
+  await databases.createDocument(
+    DATABASE_ID,
+    WATCHED_COLLECTION_ID,
+    ID.unique(),
+    {
+      user_id: user.$id,
+      movie_id: id,
+      title,
+      poster_path,
+      overview,
+      vote_average,
+    }
+  );
 
   return { success: true };
 }
-

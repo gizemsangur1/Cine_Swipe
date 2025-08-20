@@ -1,6 +1,5 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/store/useUserStore";
 import {
   Col,
@@ -14,6 +13,8 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
+import { account, databases, storage } from "@/lib/appwrite";
+import { ID } from "appwrite";
 
 type ProfileFormValues = {
   name: string;
@@ -30,19 +31,31 @@ export default function Settings() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user) {
+      try {
+        const authUser = await account.get();
+
+        const userDoc = await databases.getDocument(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+          process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+          authUser.$id
+        );
+
         setUser({
-          id: data.user.id,
-          email: data.user.email,
-          ...data.user.user_metadata,
+          id: userDoc.$id,
+          email: authUser.email,
+          name: userDoc.name || "",
+          surname: userDoc.surname || "",
+          username: userDoc.username || "",
+          avatar_url: userDoc.avatar_url || "",
         });
 
         form.setFieldsValue({
-          name: data.user.user_metadata?.name,
-          surname: data.user.user_metadata?.surname,
-          username: data.user.user_metadata?.username,
+          name: userDoc.name,
+          surname: userDoc.surname,
+          username: userDoc.username,
         });
+      } catch (err: any) {
+        console.error("Failed to fetch user", err.message);
       }
     };
 
@@ -52,46 +65,40 @@ export default function Settings() {
   const onFinish = async (values: ProfileFormValues) => {
     const { name, surname, username } = values;
 
-    let avatarUrl = user?.avatar_url;
-
-    if (selectedAvatar && user?.id) {
-      const fileExt = selectedAvatar.name.split(".").pop();
-      const fileName = `${user.id}.${fileExt}`;
-
-      await supabase.storage.from("avatars").remove([fileName]);
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(fileName, selectedAvatar, {
-          upsert: true,
-          cacheControl: "3600",
-          contentType: selectedAvatar.type || "image/jpeg",
-        });
-
-      if (uploadError) {
-        message.error("Avatar upload failed: " + uploadError.message);
-        return;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
-      avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    if (!user?.id) {
+      message.error("User not found");
+      return;
     }
 
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        name,
-        surname,
-        username,
-        avatar_url: avatarUrl,
-      },
-    });
+    let avatarUrl = user?.avatar_url || "";
 
-    if (error) {
-      message.error("Failed to update profile: " + error.message);
-    } else {
+    if (selectedAvatar) {
+      try {
+        const fileRes = await storage.createFile(
+          process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!,
+          ID.unique(),
+          selectedAvatar
+        );
+
+        avatarUrl = storage.getFileView(
+          process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!,
+          fileRes.$id
+        );
+      } catch (err: any) {
+        console.error("Avatar upload failed:", err.message);
+        message.error("Avatar upload failed");
+        return;
+      }
+    }
+
+    try {
+      await databases.updateDocument(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+        user.id,
+        { name, surname, username, avatar_url: avatarUrl }
+      );
+
       message.success("Profile updated successfully!");
       setUser({
         ...user,
@@ -103,6 +110,8 @@ export default function Settings() {
 
       setSelectedAvatar(null);
       setPreviewUrl(null);
+    } catch (err: any) {
+      message.error("Failed to update profile: " + err.message);
     }
   };
 
