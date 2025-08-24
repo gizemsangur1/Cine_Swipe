@@ -16,3 +16,9 @@ export const searchMovies = async (query: string) => {
     return [];
   }
 };
+
+export function getImageUrl(path?: string, size: string = "w200"): string {
+  if (!path) return "";
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+

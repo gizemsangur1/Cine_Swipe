@@ -1,17 +1,21 @@
 "use client";
 
-import { Button, Col, Row, Typography } from "antd";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
 import SearchBar from "./SearchBar";
 import { account, databases } from "@/lib/appwrite";
+import { Button,  Grid, Typography } from "@mui/material";
+import MenuTypography from "./Typography/MenuTypography";
+import SettingsIcon from '@mui/icons-material/Settings';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import DoneIcon from '@mui/icons-material/Done';
 
 export default function AuthButtons() {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
+  const { user, loading, setUser, setLoading } = useUserStore();
+  const [openBox, setOpenBox] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,11 +38,17 @@ export default function AuthButtons() {
         });
       } catch {
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUser();
-  }, [setUser]);
+    if (!user) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
+  }, [setUser, setLoading, user]);
 
   const handleLogout = async () => {
     try {
@@ -51,71 +61,144 @@ export default function AuthButtons() {
     }
   };
 
+  const openSettings = async () => {
+    setOpenBox(!openBox);
+  };
+
+  if (loading) {
+    return <div style={{ height: 60 }}></div>;
+  }
+
   if (user) {
     return (
-      <Row
-        style={{
+      <Grid
+        container
+        sx={{
           display: "flex",
           justifyContent: "space-between",
           padding: "10px",
           alignItems: "center",
+          backgroundColor:"transparent"
         }}
-        gutter={4}
       >
-        <Col span={4}>
-          <Link href="/">
-            <Typography style={{ fontSize: "36px", fontWeight: "bold" }}>
+        <Grid size={2} sx={{ textAlign: "center" }}>
+          <Link href="/" style={{ textDecoration: "none", color: "black" }}>
+            <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
               CineSwipe
             </Typography>
           </Link>
-        </Col>
-        <Col span={10}>
+        </Grid>
+        <Grid size={5}>
           <SearchBar />
-        </Col>
-        <Col span={2} style={{ display: "flex", justifyContent: "end" }}>
-          <Link href="/profile">
-            <div
-              style={{
-                width: "90px",
-                height: "90px",
-                backgroundColor: "#ddd",
-                borderRadius: "50%",
-                backgroundImage: user?.avatar_url
-                  ? `url(${user.avatar_url})`
-                  : "none",
-                backgroundSize: "cover",
+        </Grid>
+        <Grid
+          size={2}
+          sx={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              width: "50px",
+              height: "50px",
+              backgroundColor: "#ddd",
+              borderRadius: "50%",
+              backgroundImage: user?.avatar_url
+                ? `url(${user.avatar_url})`
+                : "none",
+              backgroundSize: "cover",
+            }}
+            onClick={openSettings}
+          ></div>
+          {openBox && (
+            <Grid
+              container
+              direction="column"
+              sx={{
+                position: "absolute",
+                top: "60px",
+                left: "-10px",
+                borderRadius: "16px",
+                background: "rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.37)",
+                color: "white",
+                zIndex: 1200,
+                padding:"10px",
+                justifyContent:"center",
+                alignItems:"center",
+                minWidth:"240px"
               }}
-            ></div>
-          </Link>
-          <Button onClick={handleLogout} style={{ marginLeft: "10px" }}>
-            Logout
-          </Button>
-        </Col>
-      </Row>
+            >
+              <MenuTypography
+                pageTitle={"Profile Settings"}
+                page={"/settings"}
+                icon={SettingsIcon}
+              />
+              <MenuTypography pageTitle={"Watch List"} page={"/watchlist"} icon={DoneIcon}/>
+
+              <MenuTypography
+                pageTitle={"Watched List"}
+                page={"/watchedlist"}
+                icon={DoneAllIcon}
+              />
+
+              <Grid size={12} >
+                <Button
+                  onClick={handleLogout}
+                  sx={{
+                    marginTop: "10px",
+                    backgroundColor: "#C5172E",
+                    color: "white",
+                    height: "35px",
+                    textTransform: "none",
+                    width: "100%",
+                    "&:hover": { backgroundColor: "#8E1616" },
+                  }}
+                >
+                  Logout
+                </Button>
+              </Grid>
+            </Grid>
+          )}
+        </Grid>
+      </Grid>
     );
   }
 
   return (
-    <Row
-      style={{ display: "flex", justifyContent: "end", padding: "10px" }}
-      gutter={4}
+    <Grid
+      container
+      sx={{ display: "flex", justifyContent: "space-between", padding: "10px" }}
     >
-      <Col span={2}>
+      <Grid size={8}>
+        <Link href="/">
+          <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
+            CineSwipe
+          </Typography>
+        </Link>
+      </Grid>
+      <Grid size={2}>
         <Button
-          style={{ width: "100%" }}
+          sx={{ width: "100%" }}
           onClick={() => router.push("/auth/signin")}
         >
           Login
         </Button>
-      </Col>
-      <Col span={2}>
+      </Grid>
+      <Grid size={2}>
         <Button
-          style={{ width: "100%" }}
+          sx={{ width: "100%" }}
           onClick={() => router.push("/auth/register")}
         >
           Register
         </Button>
-      </Col>
-    </Row>
+      </Grid>
+    </Grid>
   );
 }

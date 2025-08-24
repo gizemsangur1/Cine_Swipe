@@ -1,9 +1,27 @@
-import { Input, Button } from "antd";
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { Movie } from "@/types/Movie"; 
+import { Movie } from "@/types/Movie";
 
+import {
+  TextField,
+  IconButton,
+  CircularProgress,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Box,
+  Typography,
+  Button,
+  ListItemAvatar,
+  Avatar,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { getImageUrl } from "@/lib/tmdb";
 
 export default function SearchBar() {
   const [query, setQuery] = useState<string>("");
@@ -51,7 +69,10 @@ export default function SearchBar() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setShowResults(false);
       }
     };
@@ -61,57 +82,103 @@ export default function SearchBar() {
     };
   }, []);
 
+/*   console.log(paginatedMovies);
+ */
   return (
-    <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
-      <Input.Search
-        placeholder="Search for movies"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onSearch={() => handleSearch(query)}
-        loading={loading}
-        enterButton
-        style={{ width: "100%" }}
-        onFocus={() => {
-          if (movies.length > 0) setShowResults(true);
-        }}
-      />
+    <Box ref={containerRef} sx={{ position: "relative", width: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <TextField
+          fullWidth
+          placeholder="Search for movies..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => {
+            if (movies.length > 0) setShowResults(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch(query);
+          }}
+          InputProps={{
+            sx: {
+              borderRadius: "55px",
+            },
+            endAdornment: (
+              <IconButton onClick={() => handleSearch(query)} edge="end">
+                {loading ? <CircularProgress size={22} /> : <SearchIcon />}
+              </IconButton>
+            ),
+          }}
+        />
+      </Box>
 
       {showResults && paginatedMovies.length > 0 && (
-        <div
-          style={{
-            marginTop: "10px",
+        <Paper
+          elevation={4}
+          sx={{
+            mt: 1,
             position: "absolute",
             zIndex: 999,
             width: "100%",
-            backgroundColor: "#fff",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-            borderRadius: "8px",
-            padding: "12px",
+            borderRadius: 2,
+            maxHeight: 350,
+            overflowY: "auto",
           }}
         >
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {paginatedMovies.map((movie) => (
-              <li key={movie.id} style={{ padding: "6px 0" }}>
-                <Link
+          <List>
+            {paginatedMovies.map((movie, index) => (
+              <React.Fragment key={movie.id}>
+                <ListItem
+                  component={Link}
                   href={`/movie/${movie.id}`}
-                  style={{
+                  sx={{
                     textDecoration: "none",
-                    color: "#333",
-                    fontWeight: "500",
-                    display: "block",
+                    color: "inherit",
+                    "&:hover": { backgroundColor: "action.hover" },
                   }}
                 >
-                  {movie.title}
-                </Link>
-              </li>
+                  <ListItemAvatar>
+                    <Avatar
+                      src={getImageUrl(movie.poster_path)}
+                      alt={movie.title}
+                      sx={{ width: 56, height: 56, borderRadius: "8px" }}
+                    />
+                  </ListItemAvatar>
+                  <ListItemText
+                    sx={{ marginLeft: "10px" }}
+                    primary={movie.title}
+                    secondary={
+                      movie.release_date
+                        ? new Date(movie.release_date).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )
+                        : "Unknown"
+                    }
+                    primaryTypographyProps={{
+                      fontWeight: 500,
+                      fontSize: "1rem",
+                    }}
+                    secondaryTypographyProps={{
+                      fontSize: "0.85rem",
+                      color: "text.secondary",
+                    }}
+                  />
+                </ListItem>
+                {index < paginatedMovies.length - 1 && <Divider />}
+              </React.Fragment>
             ))}
-          </ul>
+          </List>
 
-          <div
-            style={{
+          <Box
+            sx={{
               display: "flex",
               justifyContent: "space-between",
-              marginTop: "12px",
+              alignItems: "center",
+              p: 1.5,
             }}
           >
             <Button
@@ -120,24 +187,24 @@ export default function SearchBar() {
             >
               Previous
             </Button>
-            <span>
+            <Typography variant="body2">
               Page {currentPage} of {totalPages}
-            </span>
+            </Typography>
             <Button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
             >
               Next
             </Button>
-          </div>
-        </div>
+          </Box>
+        </Paper>
       )}
 
       {movies.length === 0 && !loading && query && (
-        <div style={{ marginTop: "8px", color: "#999" }}>
+        <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
           No results found for &quot;{query}&quot;.
-        </div>
+        </Typography>
       )}
-    </div>
+    </Box>
   );
 }

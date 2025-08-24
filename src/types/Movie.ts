@@ -1,8 +1,11 @@
 export type Movie = {
   id: number;
   title: string;
-  overview: string;
-  poster_path: string;
-  vote_average: number;
-  [key: string]: unknown;
+  poster_path?: string;
+  backdrop_path?: string;
+  overview?: string;
+  release_date?: string;   
+  vote_average?: number;
+  vote_count?: number;
+  popularity?: number;
 };
