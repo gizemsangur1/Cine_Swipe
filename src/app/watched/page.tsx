@@ -5,6 +5,7 @@ import { Typography, Card, Row, Col, Spin, Button } from "antd";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
 import { useSession } from "next-auth/react";
+import PageHeader from "@/components/Typography/PageHeader";
 
 type Movie = {
   id: number;
@@ -96,8 +97,8 @@ export default function Watched() {
   }
 
   return (
-    <div style={{ padding: "40px" }}>
-      <Typography.Title level={2}>Watched Movies 🎬</Typography.Title>
+    <div style={{ padding: "40px",marginTop:"15px" }}>
+       <PageHeader pageTitle="Watched Movies"/>
       <Row gutter={[16, 16]}>
         {movies.map((movie) => (
           <Col xs={24} sm={12} md={8} lg={6} key={movie.id}>
