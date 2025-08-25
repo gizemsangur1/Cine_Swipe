@@ -7,10 +7,10 @@ import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
 
 interface SwipeCardProps {
   onSwipe: (direction: "left" | "right") => void;
-  image: string;
   title: string;
-  description: string;
-  imdb: number;
+  image: string;
+  description?: string;
+  imdb?: number;
 }
 
 export default function SwipeCard({
@@ -22,7 +22,9 @@ export default function SwipeCard({
 }: SwipeCardProps) {
   const nodeRef = useRef(null);
   const [isFlying, setIsFlying] = useState(false);
-  const [flyDirection, setFlyDirection] = useState<"left" | "right" | null>(null);
+  const [flyDirection, setFlyDirection] = useState<"left" | "right" | null>(
+    null
+  );
   const [xOffset, setXOffset] = useState(0);
 
   const handleDrag = (_: DraggableEvent, data: DraggableData) => {
@@ -104,7 +106,7 @@ export default function SwipeCard({
           <Typography.Paragraph ellipsis={{ rows: 5 }}>
             {description}
           </Typography.Paragraph>
-          <Typography.Text strong>IMDB: {imdb.toFixed(1)}</Typography.Text>
+          <Typography.Text strong> IMDB: {(imdb ?? 0).toFixed(1)}</Typography.Text>
         </div>
       </div>
     </Draggable>
