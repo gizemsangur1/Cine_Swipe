@@ -16,6 +16,10 @@ type Movie = {
   vote_average?: number;
 };
 
+type WatchlistEntry = {
+  movie_id: number;
+};
+
 export default function WatchlistPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,13 +29,14 @@ export default function WatchlistPage() {
 
   useEffect(() => {
     if (session?.user && !user) {
+      const u = session.user as Record<string, unknown>;
       setUser({
-        id: session.user.id,
-        email: session.user.email!,
-        name: (session.user as any).name || "",
-        surname: (session.user as any).surname || "",
-        username: (session.user as any).username || "",
-        avatar_url: (session.user as any).avatar_url || "",
+        id: (u.id as string) ?? "",
+        email: (u.email as string) ?? "",
+        name: (u.name as string) ?? "",
+        surname: (u.surname as string) ?? "",
+        username: (u.username as string) ?? "",
+        avatar_url: (u.avatar_url as string) ?? "",
       });
     }
   }, [session, user, setUser]);
@@ -42,25 +47,26 @@ export default function WatchlistPage() {
 
       try {
         const res = await fetch(`/api/watchlist?userId=${user.id}`);
-        const watchlist = await res.json();
+        const watchlist: WatchlistEntry[] | { error: string } = await res.json();
 
-        if (!res.ok) {
-          console.error("Watchlist fetch failed:", watchlist?.error);
+        if (!res.ok || "error" in watchlist) {
+          console.error("Watchlist fetch failed:", (watchlist as { error: string })?.error);
           return;
         }
 
-        const tmdbDetails = await Promise.all(
-          watchlist.map(async (entry: { movie_id: number }) => {
+        const tmdbDetails: Movie[] = await Promise.all(
+          (watchlist as WatchlistEntry[]).map(async (entry) => {
             const tmdbRes = await fetch(
               `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
             );
-            return await tmdbRes.json();
+            return (await tmdbRes.json()) as Movie;
           })
         );
 
         setMovies(tmdbDetails);
       } catch (err) {
-        console.error("Watchlist fetch error:", err);
+        const error = err as Error;
+        console.error("Watchlist fetch error:", error.message);
       } finally {
         setLoading(false);
       }
@@ -81,11 +87,12 @@ export default function WatchlistPage() {
       if (res.ok) {
         setMovies((prev) => prev.filter((m) => m.id !== movieId));
       } else {
-        const errorData = await res.json();
+        const errorData = (await res.json()) as { error?: string };
         console.error("Delete failed:", errorData?.error);
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      const error = err as Error;
+      console.error("Delete error:", error.message);
     }
   };
 
@@ -103,11 +110,11 @@ export default function WatchlistPage() {
       });
 
       await handleDelete(movie.id);
-    } catch (error) {
-      console.error("Failed to add to watchedlist:", error);
+    } catch (err) {
+      const error = err as Error;
+      console.error("Failed to add to watchedlist:", error.message);
     }
   };
-  console.log(movies)
 
   if (loading) {
     return (
@@ -118,8 +125,8 @@ export default function WatchlistPage() {
   }
 
   return (
-    <div style={{ padding: "40px",marginTop:"15px" }}>
-      <PageHeader pageTitle="Your Watchlist"/>
+    <div style={{ padding: "40px", marginTop: "15px" }}>
+      <PageHeader pageTitle="Your Watchlist" />
       <Row gutter={[16, 16]}>
         {movies.map((movie) => (
           <Col xs={24} sm={12} md={8} lg={6} key={movie.id}>
@@ -139,9 +146,11 @@ export default function WatchlistPage() {
             >
               <Card.Meta
                 title={movie.title}
-                description={movie.overview?.slice(0, 100) + "..."}
+                description={
+                  movie.overview ? movie.overview.slice(0, 100) + "..." : ""
+                }
               />
-              {movie.vote_average && (
+              {movie.vote_average !== undefined && (
                 <Typography.Text>⭐ {movie.vote_average}</Typography.Text>
               )}
               <Row

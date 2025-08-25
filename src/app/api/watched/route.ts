@@ -20,9 +20,10 @@ export async function GET(req: Request) {
     );
 
     return NextResponse.json(docs.documents);
-  } catch (error: any) {
-    console.error("Watched GET error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Watched GET error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -50,9 +51,10 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json(doc);
-  } catch (error: any) {
-    console.error("Watched POST error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Watched POST error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -62,7 +64,10 @@ export async function DELETE(req: Request) {
   const movieId = searchParams.get("movieId");
 
   if (!userId || !movieId) {
-    return NextResponse.json({ error: "Missing userId or movieId" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing userId or movieId" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -84,8 +89,9 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error("Watched DELETE error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Watched DELETE error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

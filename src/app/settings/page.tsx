@@ -1,15 +1,7 @@
 "use client";
 
 import { useUserStore } from "@/store/useUserStore";
-import {
-  Col,
-  Row,
-  Button,
-  Form,
-  Input,
-  Upload,
-  message,
-} from "antd";
+import { Col, Row, Button, Form, Input, Upload, message } from "antd";
 import { useEffect, useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { account, databases, storage } from "@/lib/appwrite";
@@ -29,7 +21,7 @@ export default function Settings() {
   const [form] = Form.useForm();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -45,19 +37,20 @@ export default function Settings() {
         setUser({
           id: userDoc.$id,
           email: authUser.email,
-          name: userDoc.name || "",
-          surname: userDoc.surname || "",
-          username: userDoc.username || "",
-          avatar_url: userDoc.avatar_url || "",
+          name: (userDoc as Record<string, unknown>)?.name as string ?? "",
+          surname: (userDoc as Record<string, unknown>)?.surname as string ?? "",
+          username: (userDoc as Record<string, unknown>)?.username as string ?? "",
+          avatar_url: (userDoc as Record<string, unknown>)?.avatar_url as string ?? "",
         });
 
         form.setFieldsValue({
-          name: userDoc.name,
-          surname: userDoc.surname,
-          username: userDoc.username,
+          name: (userDoc as Record<string, unknown>)?.name as string ?? "",
+          surname: (userDoc as Record<string, unknown>)?.surname as string ?? "",
+          username: (userDoc as Record<string, unknown>)?.username as string ?? "",
         });
-      } catch (err: any) {
-        console.error("Failed to fetch user", err.message);
+      } catch (err) {
+        const error = err as Error;
+        console.error("Failed to fetch user", error.message);
       }
     };
 
@@ -65,7 +58,7 @@ export default function Settings() {
   }, [form, setUser]);
 
   const onFinish = async (values: ProfileFormValues) => {
-    setLoading(true); 
+    setLoading(true);
     const { name, surname, username } = values;
 
     if (!user?.id) {
@@ -88,8 +81,9 @@ export default function Settings() {
           process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!,
           fileRes.$id
         );
-      } catch (err: any) {
-        console.error("Avatar upload failed:", err.message);
+      } catch (err) {
+        const error = err as Error;
+        console.error("Avatar upload failed:", error.message);
         message.error("Avatar upload failed");
         setLoading(false);
         return;
@@ -115,10 +109,11 @@ export default function Settings() {
 
       setSelectedAvatar(null);
       setPreviewUrl(null);
-    } catch (err: any) {
-      message.error("Failed to update profile: " + err.message);
+    } catch (err) {
+      const error = err as Error;
+      message.error("Failed to update profile: " + error.message);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -130,8 +125,8 @@ export default function Settings() {
   };
 
   return (
-    <Row style={{ width: "100%", padding: "15px" ,marginTop:"65px"}} gutter={32}>
-      <Col span={8} style={{paddingLeft:"45px"}}>
+    <Row style={{ width: "100%", padding: "15px", marginTop: "65px" }} gutter={32}>
+      <Col span={8} style={{ paddingLeft: "45px" }}>
         <div
           style={{
             width: "150px",
@@ -144,7 +139,7 @@ export default function Settings() {
               ? `url(${user.avatar_url})`
               : "none",
             backgroundSize: "cover",
-            marginTop:"55px"
+            marginTop: "55px",
           }}
         ></div>
         <Upload showUploadList={false} beforeUpload={handleBeforeUpload}>
@@ -167,11 +162,7 @@ export default function Settings() {
             <Input />
           </Form.Item>
           <Form.Item>
-            <SubmitButton
-              title="Save Changes"
-              type="submit"
-              loading={loading} 
-            />
+            <SubmitButton title="Save Changes" type="submit" loading={loading} />
           </Form.Item>
         </Form>
       </Col>

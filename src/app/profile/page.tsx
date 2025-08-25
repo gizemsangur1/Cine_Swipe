@@ -15,16 +15,21 @@ export default function ProfilePage() {
     const fetchUser = async () => {
       try {
         const authUser = await account.get();
+
+        // Appwrite Account model tipinde surname/username/avatara dair custom alanlar yok.
+        // Eğer bunlar document içinde tutuluyorsa ayrı DB çağrısı gerekir.
+        // Şimdilik optional chaining ile güvenli hale getiriyoruz.
         setUser({
           id: authUser.$id,
           email: authUser.email,
-          name: authUser.name,
-          surname: (authUser as any).surname || "",
-          username: (authUser as any).username || "",
-          avatar_url: (authUser as any).avatar_url || "",
+          name: authUser.name ?? "",
+          surname: (authUser as Record<string, unknown>)?.surname as string ?? "",
+          username: (authUser as Record<string, unknown>)?.username as string ?? "",
+          avatar_url: (authUser as Record<string, unknown>)?.avatar_url as string ?? "",
         });
-      } catch (err: any) {
-        console.error("Failed to fetch user", err.message);
+      } catch (err) {
+        const error = err as Error;
+        console.error("Failed to fetch user", error.message);
       }
     };
 
@@ -57,7 +62,7 @@ export default function ProfilePage() {
           }}
         >
           <Typography style={{ fontSize: "24px", fontWeight: "bold" }}>
-            @{user?.username}
+            @{user?.username || "anonymous"}
           </Typography>
           <Typography style={{ fontSize: "16px" }}>
             {user?.name} {user?.surname}

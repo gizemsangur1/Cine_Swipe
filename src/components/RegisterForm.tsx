@@ -2,7 +2,7 @@
 
 import { Form, Input, Button, message } from "antd";
 import { account, databases } from "@/lib/appwrite"; 
-import { ID } from "appwrite";
+import { ID, Models } from "appwrite";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 
@@ -22,7 +22,13 @@ export default function RegisterForm() {
     const { name, surname, username, email, password } = values;
 
     try {
-      const user = await account.create(ID.unique(), email, password, `${name} ${surname}`);
+      const user: Models.User<Models.Preferences> = await account.create(
+        ID.unique(),
+        email,
+        password,
+        `${name} ${surname}`
+      );
+
       await account.createEmailPasswordSession(email, password);
 
       await databases.createDocument(
@@ -49,8 +55,10 @@ export default function RegisterForm() {
 
       message.success("Account created & logged in!");
       router.push("/");
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { code?: number; message?: string };
       console.error("Register error:", error);
+
       if (error.code === 409) {
         message.error("This email is already registered.");
       } else {

@@ -24,13 +24,14 @@ export default function Watched() {
 
   useEffect(() => {
     if (session?.user && !user) {
+      const u = session.user as Record<string, unknown>;
       setUser({
-        id: session.user.id,
-        email: session.user.email!,
-        name: (session.user as any).name || "",
-        surname: (session.user as any).surname || "",
-        username: (session.user as any).username || "",
-        avatar_url: (session.user as any).avatar_url || "",
+        id: (u.id as string) ?? "",
+        email: (u.email as string) ?? "",
+        name: (u.name as string) ?? "",
+        surname: (u.surname as string) ?? "",
+        username: (u.username as string) ?? "",
+        avatar_url: (u.avatar_url as string) ?? "",
       });
     }
   }, [session, user, setUser]);
@@ -41,25 +42,26 @@ export default function Watched() {
 
       try {
         const res = await fetch(`/api/watched?userId=${user.id}`);
-        const watchedlist = await res.json();
+        const watchedlist: { movie_id: number }[] = await res.json();
 
         if (!res.ok) {
-          console.error("Watchedlist fetch failed:", watchedlist?.error);
+          console.error("Watchedlist fetch failed:", (watchedlist as any)?.error);
           return;
         }
 
-        const tmdbDetails = await Promise.all(
-          watchedlist.map(async (entry: { movie_id: number }) => {
+        const tmdbDetails: Movie[] = await Promise.all(
+          watchedlist.map(async (entry) => {
             const tmdbRes = await fetch(
               `https://api.themoviedb.org/3/movie/${entry.movie_id}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
             );
-            return await tmdbRes.json();
+            return (await tmdbRes.json()) as Movie;
           })
         );
 
         setMovies(tmdbDetails);
       } catch (err) {
-        console.error("Watchedlist fetch error:", err);
+        const error = err as Error;
+        console.error("Watchedlist fetch error:", error.message);
       } finally {
         setLoading(false);
       }
@@ -81,10 +83,11 @@ export default function Watched() {
         setMovies((prev) => prev.filter((m) => m.id !== movieId));
       } else {
         const errorData = await res.json();
-        console.error("Delete failed:", errorData?.error);
+        console.error("Delete failed:", (errorData as { error?: string })?.error);
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      const error = err as Error;
+      console.error("Delete error:", error.message);
     }
   };
 
@@ -97,8 +100,8 @@ export default function Watched() {
   }
 
   return (
-    <div style={{ padding: "40px",marginTop:"15px" }}>
-       <PageHeader pageTitle="Watched Movies"/>
+    <div style={{ padding: "40px", marginTop: "15px" }}>
+      <PageHeader pageTitle="Watched Movies" />
       <Row gutter={[16, 16]}>
         {movies.map((movie) => (
           <Col xs={24} sm={12} md={8} lg={6} key={movie.id}>
@@ -118,9 +121,11 @@ export default function Watched() {
             >
               <Card.Meta
                 title={movie.title}
-                description={movie.overview?.slice(0, 100) + "..."}
+                description={
+                  movie.overview ? movie.overview.slice(0, 100) + "..." : ""
+                }
               />
-              {movie.vote_average && (
+              {movie.vote_average !== undefined && (
                 <Typography.Text>⭐ {movie.vote_average}</Typography.Text>
               )}
               <Row

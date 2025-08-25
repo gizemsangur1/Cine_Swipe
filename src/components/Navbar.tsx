@@ -87,20 +87,20 @@ export default function AuthButtons() {
           zIndex: 1300,
         }}
       >
-        <Grid size={2} sx={{ textAlign: "center" }}>
+        <Grid size={{xs:10,md:2}} sx={{ textAlign: "center" }}>
           <Link href="/" style={{ textDecoration: "none", color: "white" }}>
             <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
               CineSwipe
             </Typography>
           </Link>
         </Grid>
-        <Grid size={5}>
+        <Grid size={{xs:0,md:5}} sx={{display:{xs:"none",md:"flex"}}}>
           <SearchBar />
         </Grid>
         <Grid
-          size={2}
+          size={{xs:0,md:2}}
           sx={{
-            display: "flex",
+            display: {xs:"none",md:"flex"},
             justifyContent: "end",
             alignItems: "center",
             position: "relative",

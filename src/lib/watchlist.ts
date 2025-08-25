@@ -1,10 +1,11 @@
-import { databases, ID } from "@/lib/appwrite";
-import { Query } from "appwrite";
+import { databases, ID, Query } from "@/lib/appwrite";
+import { Movie } from "@/types/Movie";
+
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
 const WATCHLIST_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_WATCHLIST_COLLECTION_ID!;
 
-export async function addToWatchlist(userId: string, movie: any) {
+export async function addToWatchlist(userId: string, movie: Movie) {
   return await databases.createDocument(
     DATABASE_ID,
     WATCHLIST_COLLECTION_ID,
