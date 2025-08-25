@@ -101,18 +101,22 @@ export default function SearchBar() {
           InputProps={{
             endAdornment: (
               <IconButton onClick={() => handleSearch(query)} edge="end">
-                {loading ? <CircularProgress size={22} sx={{ color: "#C5172E" }}/> : <SearchIcon sx={{ color: "white" }} />}
+                {loading ? (
+                  <CircularProgress size={22} sx={{ color: "#C5172E" }} />
+                ) : (
+                  <SearchIcon sx={{ color: "white" }} />
+                )}
               </IconButton>
             ),
           }}
           sx={{
             input: {
-              color: "white", 
+              color: "white",
             },
             "& .MuiOutlinedInput-root": {
               borderRadius: "55px",
               "& fieldset": {
-                borderColor: "white", 
+                borderColor: "white",
               },
               "&:hover fieldset": {
                 borderColor: "white",
@@ -122,10 +126,10 @@ export default function SearchBar() {
               },
             },
             "& .MuiInputLabel-root": {
-              color: "white", 
+              color: "white",
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#C5172E", 
+              color: "#C5172E",
             },
           }}
         />
@@ -204,6 +208,15 @@ export default function SearchBar() {
             <Button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
+              sx={{
+                color: "#C5172E",
+                borderRadius: "15px",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: "#C5172E",
+                  opacity: 0.8,
+                },
+              }}
             >
               Previous
             </Button>
@@ -213,6 +226,15 @@ export default function SearchBar() {
             <Button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
+              sx={{
+                color: "#C5172E",
+                borderRadius: "15px",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: "#C5172E",
+                  opacity: 0.8,
+                },
+              }}
             >
               Next
             </Button>
