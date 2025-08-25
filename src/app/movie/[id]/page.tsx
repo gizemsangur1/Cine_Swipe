@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import Image from "next/image";
+import { Grid } from "@mui/material";
 
 type Genre = {
   id: number;
@@ -44,7 +45,7 @@ export default function Movie() {
         setMovie(response.data);
       } catch (err) {
         setError("Failed to fetch movie details");
-        console.log(err)
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -58,48 +59,55 @@ export default function Movie() {
   if (!movie) return null;
 
   return (
-    <div
-      style={{
+    <Grid
+      container
+      sx={{
         backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         position: "relative",
         color: "white",
-        padding: "60px 20px",
+        padding: "80px 20px 60px",
+        minHeight: "100vh",
+        width: "100%",
       }}
     >
-      <div
-        style={{
+      <Grid
+        size={12}
+        sx={{
           position: "absolute",
           inset: 0,
           backgroundColor: "rgba(0,0,0,0.75)",
           backdropFilter: "blur(6px)",
+          zIndex: 0,
         }}
-      ></div>
+      />
 
-      <div
-        style={{
+      <Grid
+        container
+        direction="row"
+        sx={{
           position: "relative",
-          maxWidth: "1000px",
           margin: "0 auto",
           display: "flex",
-          gap: "40px",
-          alignItems: "flex-start",
           zIndex: 1,
         }}
       >
-        <Image
-          width={300}
-          height={300}
-          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-          alt={movie.title}
-          style={{
-            width: "300px",
-            borderRadius: "12px",
-            boxShadow: "0 0 20px rgba(0,0,0,0.5)",
-          }}
-        />
-        <div style={{ maxWidth: "600px" }}>
+        <Grid size={4}>
+          <Image
+            width={300}
+            height={300}
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            alt={movie.title}
+            style={{
+              width: "300px",
+              borderRadius: "12px",
+              boxShadow: "0 0 20px rgba(0,0,0,0.5)",
+            }}
+          />
+        </Grid>
+
+        <Grid size={8}>
           <h1 style={{ fontSize: "36px", marginBottom: "20px" }}>
             {movie.title}
           </h1>
@@ -120,10 +128,11 @@ export default function Movie() {
             <strong>Rating:</strong> {movie.vote_average}
           </p>
           <p>
-            <strong>Genres:</strong> {movie.genres.map((g) => g.name).join(", ")}
+            <strong>Genres:</strong>{" "}
+            {movie.genres.map((g) => g.name).join(", ")}
           </p>
-        </div>
-      </div>
-    </div>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 }

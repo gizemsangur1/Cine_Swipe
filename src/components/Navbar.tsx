@@ -6,11 +6,12 @@ import Link from "next/link";
 import { useUserStore } from "@/store/useUserStore";
 import SearchBar from "./SearchBar";
 import { account, databases } from "@/lib/appwrite";
-import { Button,  Grid, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import MenuTypography from "./Typography/MenuTypography";
-import SettingsIcon from '@mui/icons-material/Settings';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import DoneIcon from '@mui/icons-material/Done';
+import SettingsIcon from "@mui/icons-material/Settings";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import DoneIcon from "@mui/icons-material/Done";
+import LogoutButton from "./Buttons/Logout/LogoutButton";
 
 export default function AuthButtons() {
   const router = useRouter();
@@ -76,13 +77,18 @@ export default function AuthButtons() {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          padding: "10px",
+          padding: "10px 20px",
           alignItems: "center",
-          backgroundColor:"transparent"
+          backgroundColor: "transparent",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          zIndex: 1300,
         }}
       >
         <Grid size={2} sx={{ textAlign: "center" }}>
-          <Link href="/" style={{ textDecoration: "none", color: "black" }}>
+          <Link href="/" style={{ textDecoration: "none", color: "white" }}>
             <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
               CineSwipe
             </Typography>
@@ -125,14 +131,14 @@ export default function AuthButtons() {
                 background: "rgba(255, 255, 255, 0.1)",
                 backdropFilter: "blur(20px) saturate(180%)",
                 WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.37)",
                 color: "white",
                 zIndex: 1200,
-                padding:"10px",
-                justifyContent:"center",
-                alignItems:"center",
-                minWidth:"240px"
+                padding: "20px",
+                justifyContent: "center",
+                alignItems: "center",
+                minWidth: "240px",
               }}
             >
               <MenuTypography
@@ -140,29 +146,20 @@ export default function AuthButtons() {
                 page={"/settings"}
                 icon={SettingsIcon}
               />
-              <MenuTypography pageTitle={"Watch List"} page={"/watchlist"} icon={DoneIcon}/>
+              <MenuTypography
+                pageTitle={"Watch List"}
+                page={"/watchlist"}
+                icon={DoneIcon}
+              />
 
               <MenuTypography
                 pageTitle={"Watched List"}
-                page={"/watchedlist"}
+                page={"/watched"}
                 icon={DoneAllIcon}
               />
 
-              <Grid size={12} >
-                <Button
-                  onClick={handleLogout}
-                  sx={{
-                    marginTop: "10px",
-                    backgroundColor: "#C5172E",
-                    color: "white",
-                    height: "35px",
-                    textTransform: "none",
-                    width: "100%",
-                    "&:hover": { backgroundColor: "#8E1616" },
-                  }}
-                >
-                  Logout
-                </Button>
+              <Grid size={12}>
+                <LogoutButton onLogout={handleLogout} />
               </Grid>
             </Grid>
           )}

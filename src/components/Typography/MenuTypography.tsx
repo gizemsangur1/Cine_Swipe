@@ -27,14 +27,14 @@ export default function MenuTypography({
         }}
       >
         <Grid size={2} sx={{ display: "flex", justifyContent: "center" }}>
-          {Icon && <Icon fontSize="small" sx={{ color: "black" }} />}
+          {Icon && <Icon fontSize="small" sx={{ color: "white" }} />}
         </Grid>
         <Grid size={10}>
           <Typography
             sx={{
               fontWeight: 500,
               fontSize: "16px",
-              color: "black",
+              color: "white",
             }}
           >
             {pageTitle}

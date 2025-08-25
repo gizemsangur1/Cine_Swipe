@@ -25,8 +25,8 @@ export default function SwipeDeck({ movies, onSwipe }: SwipeDeckProps) {
             key={movie.id}
             image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             title={movie.title}
-            description={movie.overview}
-            imdb={movie.vote_average}
+            description={movie?.overview}
+            imdb={movie?.vote_average}
             onSwipe={(direction) => {
               if (!user) toast("First login.");
               onSwipe(movie.id, direction);

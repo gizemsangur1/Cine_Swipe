@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import SwipeDeck from "./SwipeDeck";
 import { addToWatchlist } from "@/lib/functions";
 import { Movie } from "@/types/Movie";
-
-
+import SubmitButton from "./Buttons/Submit/SubmitButton";
 
 export default function AiRecommend() {
   const [input, setInput] = useState("");
@@ -56,17 +55,24 @@ export default function AiRecommend() {
 
   return (
     <>
-      <Row style={{ width: "100%" }}>
+      <Row style={{ width: "100%" ,justifyContent:"center",display:"center"}}>
         <Input
-          style={{ width: "80%" }}
+          style={{
+            width: "80%",
+            backgroundColor: "transparent",
+            color: "whitesmoke",
+            border: "none",
+            borderBottom: "2px solid white",
+            borderRadius: 0,
+            boxShadow: "none",
+          }}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. romantic period drama with strong female lead"
           disabled={loading}
+          className="custom-input"
         />
-        <Button onClick={handleFind} loading={loading}>
-          FIND
-        </Button>
+        <SubmitButton title="FIND" loading={loading} onClick={handleFind} />
       </Row>
 
       <Row

@@ -82,8 +82,8 @@ export default function SearchBar() {
     };
   }, []);
 
-/*   console.log(paginatedMovies);
- */
+  /*   console.log(paginatedMovies);
+   */
   return (
     <Box ref={containerRef} sx={{ position: "relative", width: "100%" }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -99,14 +99,34 @@ export default function SearchBar() {
             if (e.key === "Enter") handleSearch(query);
           }}
           InputProps={{
-            sx: {
-              borderRadius: "55px",
-            },
             endAdornment: (
               <IconButton onClick={() => handleSearch(query)} edge="end">
-                {loading ? <CircularProgress size={22} /> : <SearchIcon />}
+                {loading ? <CircularProgress size={22} sx={{ color: "#C5172E" }}/> : <SearchIcon sx={{ color: "white" }} />}
               </IconButton>
             ),
+          }}
+          sx={{
+            input: {
+              color: "white", 
+            },
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "55px",
+              "& fieldset": {
+                borderColor: "white", 
+              },
+              "&:hover fieldset": {
+                borderColor: "white",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#C5172E",
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "white", 
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#C5172E", 
+            },
           }}
         />
       </Box>

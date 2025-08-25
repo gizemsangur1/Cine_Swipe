@@ -1,5 +1,32 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100vh;
+  background-image: linear-gradient(to right, #d7d2cc 0%, #304352 100%);
+  background-attachment: fixed;
+}
+
+.custom-input:focus,
+.custom-input-focused,
+.custom-input:focus-within {
+  border-bottom: 2px solid #c5172e !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-button {
+  background-color: #c5172e !important;
+  border-color: #c5172e !important;
+  color: white !important;
+}
+
+.custom-button:hover {
+  background-color: #8e1616 !important;
+  border-color: #8e1616 !important;
+  color: white !important;
+}
+
+.custom-button .ant-btn-loading-icon .anticon {
+  color: white !important;
 }

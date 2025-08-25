@@ -4,7 +4,6 @@ import { useUserStore } from "@/store/useUserStore";
 import {
   Col,
   Row,
-  Typography,
   Button,
   Form,
   Input,
@@ -15,6 +14,8 @@ import { useEffect, useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { account, databases, storage } from "@/lib/appwrite";
 import { ID } from "appwrite";
+import PageHeader from "@/components/Typography/PageHeader";
+import SubmitButton from "@/components/Buttons/Submit/SubmitButton";
 
 type ProfileFormValues = {
   name: string;
@@ -28,6 +29,7 @@ export default function Settings() {
   const [form] = Form.useForm();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -63,10 +65,12 @@ export default function Settings() {
   }, [form, setUser]);
 
   const onFinish = async (values: ProfileFormValues) => {
+    setLoading(true); 
     const { name, surname, username } = values;
 
     if (!user?.id) {
       message.error("User not found");
+      setLoading(false);
       return;
     }
 
@@ -87,6 +91,7 @@ export default function Settings() {
       } catch (err: any) {
         console.error("Avatar upload failed:", err.message);
         message.error("Avatar upload failed");
+        setLoading(false);
         return;
       }
     }
@@ -112,6 +117,8 @@ export default function Settings() {
       setPreviewUrl(null);
     } catch (err: any) {
       message.error("Failed to update profile: " + err.message);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -123,9 +130,8 @@ export default function Settings() {
   };
 
   return (
-    <Row style={{ width: "100%", padding: "15px" }} gutter={32}>
-      <Col span={8}>
-        <Typography.Title level={3}>Profile</Typography.Title>
+    <Row style={{ width: "100%", padding: "15px" ,marginTop:"65px"}} gutter={32}>
+      <Col span={8} style={{paddingLeft:"45px"}}>
         <div
           style={{
             width: "150px",
@@ -138,6 +144,7 @@ export default function Settings() {
               ? `url(${user.avatar_url})`
               : "none",
             backgroundSize: "cover",
+            marginTop:"55px"
           }}
         ></div>
         <Upload showUploadList={false} beforeUpload={handleBeforeUpload}>
@@ -148,7 +155,7 @@ export default function Settings() {
       </Col>
 
       <Col span={12}>
-        <Typography.Title level={3}>Edit Profile</Typography.Title>
+        <PageHeader pageTitle="Edit Profile" />
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item label="Name" name="name">
             <Input />
@@ -160,9 +167,11 @@ export default function Settings() {
             <Input />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Save Changes
-            </Button>
+            <SubmitButton
+              title="Save Changes"
+              type="submit"
+              loading={loading} 
+            />
           </Form.Item>
         </Form>
       </Col>
