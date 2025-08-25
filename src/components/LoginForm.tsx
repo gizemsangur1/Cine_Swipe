@@ -6,13 +6,21 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import { Models } from "appwrite";
 
+type UserDoc = Models.Document & {
+  email: string;
+  name: string;
+  surname: string;
+  username: string;
+  avatar_url: string;
+};
+
 export default function LoginForm() {
   const router = useRouter();
   const setUser = useUserStore((s) => s.setUser);
 
   const ensureUserDoc = async (authUser: Models.User<Models.Preferences>) => {
     try {
-      await databases.createDocument(
+      await databases.createDocument<UserDoc>(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
         authUser.$id,
@@ -39,7 +47,7 @@ export default function LoginForm() {
       const authUser = await account.get();
       await ensureUserDoc(authUser);
 
-      const userDoc = await databases.getDocument(
+      const userDoc = await databases.getDocument<UserDoc>(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
         authUser.$id
@@ -48,10 +56,10 @@ export default function LoginForm() {
       setUser({
         id: userDoc.$id,
         email: authUser.email,
-        name: (userDoc as any).name || "",
-        surname: (userDoc as any).surname || "",
-        username: (userDoc as any).username || "",
-        avatar_url: (userDoc as any).avatar_url || "",
+        name: userDoc.name,
+        surname: userDoc.surname,
+        username: userDoc.username,
+        avatar_url: userDoc.avatar_url,
       });
 
       message.success("Login successful!");
