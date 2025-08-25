@@ -1,10 +1,12 @@
 "use client";
 
-import { Form, Input, Button, message } from "antd";
-import { account, databases } from "@/lib/appwrite"; 
+import { Form, Input, message } from "antd";
+import { account, databases } from "@/lib/appwrite";
 import { ID, Models } from "appwrite";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
+import SubmitButton from "@/components/Buttons/Submit/SubmitButton";
+import { useState } from "react";
 
 type RegisterFormValues = {
   name: string;
@@ -17,9 +19,11 @@ type RegisterFormValues = {
 export default function RegisterForm() {
   const router = useRouter();
   const setUser = useUserStore((s) => s.setUser);
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: RegisterFormValues) => {
     const { name, surname, username, email, password } = values;
+    setLoading(true);
 
     try {
       const user: Models.User<Models.Preferences> = await account.create(
@@ -64,6 +68,8 @@ export default function RegisterForm() {
       } else {
         message.error(error.message || "Registration failed.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,9 +104,7 @@ export default function RegisterForm() {
         <Input.Password />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
-          Register
-        </Button>
+        <SubmitButton title="Register" type="submit" loading={loading} />
       </Form.Item>
     </Form>
   );

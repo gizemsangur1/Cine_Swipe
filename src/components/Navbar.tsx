@@ -87,20 +87,23 @@ export default function AuthButtons() {
           zIndex: 1300,
         }}
       >
-        <Grid size={{xs:10,md:2}} sx={{ textAlign: "center" }}>
+        <Grid size={{ xs: 10, md: 2 }} sx={{ textAlign: "center" }}>
           <Link href="/" style={{ textDecoration: "none", color: "white" }}>
             <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
               CineSwipe
             </Typography>
           </Link>
         </Grid>
-        <Grid size={{xs:0,md:5}} sx={{display:{xs:"none",md:"flex"}}}>
+        <Grid
+          size={{ xs: 0, md: 5 }}
+          sx={{ display: { xs: "none", md: "flex" } }}
+        >
           <SearchBar />
         </Grid>
         <Grid
-          size={{xs:0,md:2}}
+          size={{ xs: 0, md: 2 }}
           sx={{
-            display: {xs:"none",md:"flex"},
+            display: { xs: "none", md: "flex" },
             justifyContent: "end",
             alignItems: "center",
             position: "relative",
@@ -173,24 +176,41 @@ export default function AuthButtons() {
       container
       sx={{ display: "flex", justifyContent: "space-between", padding: "10px" }}
     >
-      <Grid size={8}>
-        <Link href="/">
-          <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
+      <Grid size={9}>
+        <Typography
+          sx={{ fontSize: "36px", fontWeight: "bold", color: "white" }}
+        >
+          <Link href="/" style={{ textDecoration: "none",color:"white" }}>
             CineSwipe
-          </Typography>
-        </Link>
+          </Link>
+        </Typography>
       </Grid>
-      <Grid size={2}>
+      <Grid size={3} sx={{ display: "flex", justifyContent: "end" }}>
         <Button
-          sx={{ width: "100%" }}
+          sx={{
+            backgroundColor: "#C5172E",
+            "&:hover": { backgroundColor: "#8E1616" },
+            textTransform: "none",
+            borderRadius: "25px",
+            color: "white",
+            width: "75px",
+            marginRight:"10px",
+          }}
           onClick={() => router.push("/auth/signin")}
         >
           Login
         </Button>
-      </Grid>
-      <Grid size={2}>
+
         <Button
-          sx={{ width: "100%" }}
+          sx={{
+            backgroundColor: "#C5172E",
+            "&:hover": { backgroundColor: "#8E1616" },
+            textTransform: "none",
+            borderRadius: "25px",
+            color: "white",
+            width: "75px",
+            marginLeft:"10px"
+          }}
           onClick={() => router.push("/auth/register")}
         >
           Register

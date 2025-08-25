@@ -1,10 +1,12 @@
 "use client";
 
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, message } from "antd";
 import { account, databases } from "@/lib/appwrite";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/useUserStore";
 import { Models } from "appwrite";
+import { useState } from "react";
+import SubmitButton from "@/components/Buttons/Submit/SubmitButton";
 
 type UserDoc = Models.Document & {
   email: string;
@@ -17,6 +19,7 @@ type UserDoc = Models.Document & {
 export default function LoginForm() {
   const router = useRouter();
   const setUser = useUserStore((s) => s.setUser);
+  const [loading, setLoading] = useState(false);
 
   const ensureUserDoc = async (authUser: Models.User<Models.Preferences>) => {
     try {
@@ -41,6 +44,7 @@ export default function LoginForm() {
   };
 
   const onFinish = async (values: { email: string; password: string }) => {
+    setLoading(true);
     try {
       await account.createEmailPasswordSession(values.email, values.password);
 
@@ -73,6 +77,8 @@ export default function LoginForm() {
       } else {
         message.error(error.message || "Login failed.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,9 +104,7 @@ export default function LoginForm() {
         <Input.Password />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
-          Login
-        </Button>
+        <SubmitButton title="Login" type="submit" loading={loading} />
       </Form.Item>
     </Form>
   );

@@ -1,13 +1,14 @@
 "use client";
 
 import { useUserStore } from "@/store/useUserStore";
-import { Col, Row, Button, Form, Input, Upload, message } from "antd";
+import { Form, Input, Upload, message } from "antd";
 import { useEffect, useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { account, databases, storage } from "@/lib/appwrite";
 import { ID } from "appwrite";
 import PageHeader from "@/components/Typography/PageHeader";
 import SubmitButton from "@/components/Buttons/Submit/SubmitButton";
+import { Grid, Button } from "@mui/material";
 
 type ProfileFormValues = {
   name: string;
@@ -125,8 +126,8 @@ export default function Settings() {
   };
 
   return (
-    <Row style={{ width: "100%", padding: "15px", marginTop: "65px" }} gutter={32}>
-      <Col span={8} style={{ paddingLeft: "45px" }}>
+    <Grid container spacing={4} sx={{ width: "100%", padding: "15px", marginTop: "65px" }}>
+      <Grid size={{xs:12,md:4}} sx={{ display:"flex",flexDirection:"column",paddingLeft: {xs:0,md:"45px"},alignItems:"center" }}>
         <div
           style={{
             width: "150px",
@@ -143,13 +144,17 @@ export default function Settings() {
           }}
         ></div>
         <Upload showUploadList={false} beforeUpload={handleBeforeUpload}>
-          <Button icon={<UploadOutlined />} style={{ marginTop: "15px" }}>
+          <Button
+            variant="outlined"
+            startIcon={<UploadOutlined />}
+            sx={{ marginTop: "15px",color:"#C5172E" ,borderColor:"#C5172E"}}
+          >
             Upload New Avatar
           </Button>
         </Upload>
-      </Col>
+      </Grid>
 
-      <Col span={12}>
+      <Grid size={{xs:12,md:8}}>
         <PageHeader pageTitle="Edit Profile" />
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item label="Name" name="name">
@@ -165,7 +170,7 @@ export default function Settings() {
             <SubmitButton title="Save Changes" type="submit" loading={loading} />
           </Form.Item>
         </Form>
-      </Col>
-    </Row>
+      </Grid>
+    </Grid>
   );
 }

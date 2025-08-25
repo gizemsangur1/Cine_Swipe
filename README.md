@@ -2,7 +2,7 @@
 **CineSwipe** is a modern movie discovery web app powered by the TMDB API. It lets users search for films, view detailed information, and explore movie content with a clean and responsive UI inspired by swipe interactions.
 
 ## Live Demo
-https://cineswipe.netlify.app/
+https://cine-swipe-pink.vercel.app/
 
 ## Features
 
