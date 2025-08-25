@@ -107,6 +107,7 @@ export default function WatchlistPage() {
       console.error("Failed to add to watchedlist:", error);
     }
   };
+  console.log(movies)
 
   if (loading) {
     return (

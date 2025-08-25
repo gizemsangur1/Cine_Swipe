@@ -30,42 +30,41 @@ export default function LoginForm() {
     }
   };
 
-  const onFinish = async (values: { email: string; password: string }) => {
-    try {
-      await account.createEmailPasswordSession(values.email, values.password);
+const onFinish = async (values: { email: string; password: string }) => {
+  try {
+    await account.createEmailPasswordSession(values.email, values.password);
 
-      const authUser = await account.get();
-      await ensureUserDoc(authUser);
+    const authUser = await account.get();
+    await ensureUserDoc(authUser);
 
-      const userDoc = await databases.getDocument(
-        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
-        authUser.$id
-      );
+    const userDoc = await databases.getDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+      authUser.$id
+    );
 
-      // 🔥 Store'a yaz
-      setUser({
-        id: userDoc.$id,
-        email: authUser.email,
-        name: userDoc.name || "",
-        surname: userDoc.surname || "",
-        username: userDoc.username || "",
-        avatar_url: userDoc.avatar_url || "",
-      });
+    setUser({
+      id: userDoc.$id,
+      email: authUser.email,
+      name: userDoc.name || "",
+      surname: userDoc.surname || "",
+      username: userDoc.username || "",
+      avatar_url: userDoc.avatar_url || "",
+    });
 
-      message.success("Login successful!");
-      router.push("/");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      if (error.code === 401) {
-        message.error("Invalid email or password.");
-      } else if (error.code === 429) {
-        message.error("Too many attempts, please wait a moment.");
-      } else {
-        message.error(error.message || "Login failed.");
-      }
+    message.success("Login successful!");
+    router.push("/");
+  } catch (error: any) {
+    if (error.code === 401) {
+      message.error("Invalid email or password.");
+    } else if (error.code === 429) {
+      message.error("Too many attempts, please wait a moment.");
+    } else {
+      message.error(error.message || "Login failed.");
     }
-  };
+  }
+};
+
 
   return (
     <Form

@@ -1,54 +1,91 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { adminDatabases, Query, ID } from "@/lib/appwriteAdmin";
 
-export async function GET(request: Request) {
-	const { searchParams } = new URL(request.url);
-	const userId = searchParams.get("userId");
-	const authHeader = request.headers.get("Authorization");
+const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+const WATCHLIST_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_WATCHLIST_COLLECTION_ID!;
 
-	if (!userId || !authHeader) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-	}
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
 
-	const res = await fetch(
-		`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/watchlist?user_id=eq.${userId}`,
-		{
-			headers: {
-				apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-				Authorization: authHeader,
-			},
-		}
-	);
+  if (!userId) {
+    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  }
 
-	const data = await res.json();
-	return NextResponse.json(data);
+  try {
+    const docs = await adminDatabases.listDocuments(
+      DATABASE_ID,
+      WATCHLIST_COLLECTION_ID,
+      [Query.equal("user_id", userId)]
+    );
+
+    return NextResponse.json(docs.documents);
+  } catch (error: any) {
+    console.error("Watchlist GET error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { userId, movie } = body;
 
-export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const movieId = searchParams.get("movieId");
+  if (!userId || !movie) {
+    return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  }
+
+  try {
+    const doc = await adminDatabases.createDocument(
+      DATABASE_ID,
+      WATCHLIST_COLLECTION_ID,
+      ID.unique(),
+      {
+        user_id: userId,
+        movie_id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        overview: movie.overview?.slice(0, 500) ?? "",
+        vote_average: movie.vote_average ?? 0,
+      }
+    );
+
+    return NextResponse.json(doc);
+  } catch (error: any) {
+    console.error("Watchlist POST error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
-  const authHeader = request.headers.get("Authorization");
+  const movieId = searchParams.get("movieId");
 
-  if (!movieId || !userId || !authHeader) {
-    return NextResponse.json({ error: "Unauthorized or missing params" }, { status: 401 });
+  if (!userId || !movieId) {
+    return NextResponse.json({ error: "Missing userId or movieId" }, { status: 400 });
   }
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/watchlist?user_id=eq.${userId}&movie_id=eq.${movieId}`,
-    {
-      method: "DELETE",
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: authHeader,
-      },
+  try {
+    const docs = await adminDatabases.listDocuments(
+      DATABASE_ID,
+      WATCHLIST_COLLECTION_ID,
+      [
+        Query.equal("user_id", userId),
+        Query.equal("movie_id", parseInt(movieId)),
+      ]
+    );
+
+    if (docs.total > 0) {
+      await adminDatabases.deleteDocument(
+        DATABASE_ID,
+        WATCHLIST_COLLECTION_ID,
+        docs.documents[0].$id
+      );
     }
-  );
 
-  if (!res.ok) {
-    const error = await res.json();
-    return NextResponse.json({ error }, { status: res.status });
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Watchlist DELETE error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }
